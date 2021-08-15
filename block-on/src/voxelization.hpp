@@ -57,6 +57,8 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t depth, Octnode root);
 
 int smallIntPow(int x, uint8_t p); //from math.h
 
+
+
 //variables
 uint8_t depth = 6;
 Octnode* root = new Octnode(glm::ivec3(0, 0, 0), NULL);
@@ -93,6 +95,10 @@ void voxelizeTriangle(float x0, float y0, float z0,
 	ILV(P0, P2, E1);
 	ILV(P1, P2, E2);
 
+	delete &P0;
+	delete &P1;
+	delete &P2;
+
 	for (const glm::ivec3 &x : E0)
 	{
 		addVoxelToOctree(x, depth, *root);
@@ -108,6 +114,10 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		E0.push_back(x);
 	}
 	fillInterior(E0, E1, P0, P2, domAxis);
+
+	delete& E0;
+	delete& E1;
+	delete& E2;
 }
 
 /*
@@ -121,6 +131,7 @@ glm::ivec3 voxelizePoint(glm::vec3 p)
 					  static_cast<int>(p.y + 0.5f),
 					  static_cast<int>(p.z + 0.5f));
 }
+
 /**
 *	Function that voxelizes 3D point based by floats
 *	float x,y,z - the coordinates
@@ -150,15 +161,35 @@ axis dominantAxis(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2)
 	if (max < y)
 		max = y;
 	int z = E0.x * E1.y - E0.y * E1.x;
+
+	delete& E0;
+	delete& E1;
 	if (max < z)
 		max = z;
 
-	if (max == x)
+	if (max == x) {
+		delete& max;
+		delete& x;
+		delete& y;
+		delete& z;
 		return 0;
+	}
 	if (max == y)
+	{
+		delete& max;
+		delete& x;
+		delete& y;
+		delete& z;
 		return 1;
+	}
 	if (max == z)
+	{
+		delete& max;
+		delete& x;
+		delete& y;
+		delete& z;
 		return 2;
+	}
 	else
 	{
 		throw std::invalid_argument("Dominant Axis must be 0, 1, or 2");
@@ -212,7 +243,12 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 		L -= glm::ivec3(L[min], L[min], L[min]);
 		L[min] = 2 * M[min];
 		list.push_back(currentP);
+		delete& min;
 	}
+	delete& dP;
+	delete& M;
+	delete& L;
+	delete& currentP;
 }
 
 /*
@@ -244,7 +280,12 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 		L -= glm::ivec3(L[min], L[min], L[min]);
 		L[min] = 2 * M[min];
 		addVoxelToOctree(currentP, depth, root);
+		delete& min;
 	}
+	delete& dP;
+	delete& M;
+	delete& L;
+	delete& currentP;
 }
 
 /*
@@ -283,7 +324,7 @@ void fillInterior(std::list<glm::ivec3> E0,
 		
 		while (itSliceE0 != sliceE0.end() && itSliceE1 != sliceE1.end())
 		{
-			if (lineCondition(*std::next(itSliceE0, 1), domAxis, 0, 0, 0, 0))
+			if (lineCondition(*std::next(itSliceE0, 1), domAxis, 0, 0, 0, 0)) //TODO: add proper variables here
 				std::advance(itSliceE0, 1);
 			else if (lineCondition(*std::next(itSliceE1, 1), domAxis, 0, 0, 0, 0))
 				std::advance(itSliceE1, 1);
@@ -292,7 +333,15 @@ void fillInterior(std::list<glm::ivec3> E0,
 		}
 
 		ILV(*sliceE0.end(), *sliceE1.end(), *root);
+
+		delete& slice;
+		delete& sliceE0;
+		delete& sliceE1;
+		delete& itSliceE0;
+		delete& itSliceE1;
 	}
+	delete& itE0;
+	delete& itE1;
 }
 
 /*
@@ -372,6 +421,12 @@ bool lineCondition(glm::ivec3 point, axis w, int dU, int dV, int U, int V)
 
 	int compare = dV * u - dU * v;
 	return (m - n <= compare && compare <= m + n);
+
+	delete& m;
+	delete& n;
+	delete& compare;
+	delete& u;
+	delete& v;
 	
 }
 
@@ -428,6 +483,8 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t depth, Octnode root)
 		else
 			newPoint.z -= half;
 
+		delete& half;
+
 		//assign child
 		if (i == 1)
 		{
@@ -441,7 +498,13 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t depth, Octnode root)
 				main.children[a] = new Octnode(newPoint, &main);
 			main = *main.children[a];
 		}
+
+		delete& newPoint;
 		i++;
 	}
+
+	delete& a;
+	delete& main;
+	delete& i;
 }
 #endif
