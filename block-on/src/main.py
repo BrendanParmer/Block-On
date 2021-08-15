@@ -47,9 +47,12 @@ class BlockOn(bpy.types.Operator):
         mesh = blocky_obj.data
         mesh.calc_loop_triangles()
         for tri in mesh.loop_triangles:
-            bo.vox_tri(mesh.vertices[tri.vertices[0]].co, 
-                             mesh.vertices[tri.vertices[1]].co, 
-                             mesh.vertices[tri.vertices[2]].co)
+            p0 = mesh.vertices[tri.vertices[0]].co
+            p1 = mesh.vertices[tri.vertices[1]].co
+            p2 = mesh.vertices[tri.vertices[2]].co
+            bo.vox_tri(p0.x, p0.y, p0.z,
+                       p1.x, p1.y, p1.z,
+                       p2.x, p2.y, p2.z)
                              
         return {'FINISHED'}
     

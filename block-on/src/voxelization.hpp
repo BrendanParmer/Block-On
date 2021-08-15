@@ -33,9 +33,12 @@ TODO
 typedef uint8_t axis; //x=0, y=1, z=2
 
 void init(uint8_t setDepth);
-void voxelizeTriangle(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2);
+void voxelizeTriangle(float x0, float y0, float z0,
+					  float x1, float y1, float z1,
+					  float x2, float y2, float z2);
 
 glm::ivec3 voxelizePoint(glm::vec3 p);
+glm::ivec3 voxelizePoint(float x, float y, float z);
 
 axis dominantAxis(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2);
 void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis anAxis);
@@ -67,12 +70,16 @@ void init(uint8_t setDepth = 6)
 
 /*
 * function that voxelizes a triangle given three floating point vertices, p0, p1, and p2
+* the nine arguments correspond with the 9 floats needed to define the triangle
 */
-void voxelizeTriangle(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2)
+void voxelizeTriangle(float x0, float y0, float z0,
+					  float x1, float y1, float z1,
+					  float x2, float y2, float z2)
 {
-	glm::ivec3 P0 = voxelizePoint(p0);
-	glm::ivec3 P1 = voxelizePoint(p1);
-	glm::ivec3 P2 = voxelizePoint(p2);
+
+	glm::ivec3 P0 = voxelizePoint(x0, y0, z0);
+	glm::ivec3 P1 = voxelizePoint(x1, y1, z1);
+	glm::ivec3 P2 = voxelizePoint(x2, y2, z2);
 	
 	axis domAxis = dominantAxis(P0, P1, P2);
 	sortThreeIntPoints(P0, P1, P2, domAxis);
@@ -113,6 +120,16 @@ glm::ivec3 voxelizePoint(glm::vec3 p)
 	return glm::ivec3(static_cast<int>(p.x + 0.5f),
 					  static_cast<int>(p.y + 0.5f),
 					  static_cast<int>(p.z + 0.5f));
+}
+/**
+*	Function that voxelizes 3D point based by floats
+*	float x,y,z - the coordinates
+*/
+glm::ivec3 voxelizePoint(float x, float y, float z)
+{
+	return glm::ivec3(static_cast<int>(x + 0.5f),
+					  static_cast<int>(y + 0.5f),
+					  static_cast<int>(z + 0.5f));
 }
 
 /*

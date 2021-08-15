@@ -22,7 +22,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="x64\Release\main.py">
+    <None Include="src\main.py">
       <Filter>src</Filter>
     </None>
   </ItemGroup>

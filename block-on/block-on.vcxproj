@@ -154,7 +154,7 @@
     <ClCompile Include="src\block_on.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="x64\Release\main.py" />
+    <None Include="src\main.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
