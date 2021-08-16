@@ -322,14 +322,80 @@ void fillInterior(std::list<glm::ivec3> E0,
 		
 		ILV(*itSliceE0, *itSliceE1, *root);
 		
+		glm::ivec3 last0 = *itSliceE0;
+		glm::ivec3 last1 = *itSliceE1;
+
+		int dU, dV, U0, V0, U1, V1;
+		if (domAxis == 0) //x
+		{
+			dU = last0.y - last1.y;
+			dV = last0.z - last1.z;
+			U0 = last0.y;
+			V0 = last0.z;
+			U1 = last1.y;
+			V1 = last1.z;
+		}
+		else if (domAxis == 1) //y
+		{
+			dU = last0.z - last1.z;
+			dV = last0.x - last1.x;
+			U0 = last0.z;
+			V0 = last0.x;
+			U1 = last1.z;
+			V1 = last1.x;
+		}
+		else if (domAxis == 2) //z
+		{
+			dU = last0.x - last1.x;
+			dV = last0.y - last1.y;
+			U0 = last0.x;
+			V0 = last0.y;
+			U1 = last1.x;
+			V1 = last1.y;
+		}
+
 		while (itSliceE0 != sliceE0.end() && itSliceE1 != sliceE1.end())
 		{
-			if (lineCondition(*std::next(itSliceE0, 1), domAxis, 0, 0, 0, 0)) //TODO: add proper variables here
+			if (lineCondition(*std::next(itSliceE0, 1), domAxis, dU, dV, U0, V0)) //TODO: add proper variables here
 				std::advance(itSliceE0, 1);
-			else if (lineCondition(*std::next(itSliceE1, 1), domAxis, 0, 0, 0, 0))
+			else if (lineCondition(*std::next(itSliceE1, 1), domAxis, dU, dV, U0, V0))
 				std::advance(itSliceE1, 1);
 			else
+			{
 				ILV(*itSliceE0, *itSliceE1, *root);
+				last0 = *itSliceE0;
+				last1 = *itSliceE1;
+
+				//probably should condense into a function
+				if (domAxis == 0) //x
+				{
+					dU = last0.y - last1.y;
+					dV = last0.z - last1.z;
+					U0 = last0.y;
+					V0 = last0.z;
+					U1 = last1.y;
+					V1 = last1.z;
+				}
+				else if (domAxis == 1) //y
+				{
+					dU = last0.z - last1.z;
+					dV = last0.x - last1.x;
+					U0 = last0.z;
+					V0 = last0.x;
+					U1 = last1.z;
+					V1 = last1.x;
+				}
+				else if (domAxis == 2) //z
+				{
+					dU = last0.x - last1.x;
+					dV = last0.y - last1.y;
+					U0 = last0.x;
+					V0 = last0.y;
+					U1 = last1.x;
+					V1 = last1.y;
+				}
+			}
+
 		}
 
 		ILV(*sliceE0.end(), *sliceE1.end(), *root);
@@ -339,6 +405,8 @@ void fillInterior(std::list<glm::ivec3> E0,
 		delete& sliceE1;
 		delete& itSliceE0;
 		delete& itSliceE1;
+		delete& last0;
+		delete& last1;
 	}
 	delete& itE0;
 	delete& itE1;
