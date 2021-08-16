@@ -151,10 +151,10 @@
     <ClInclude Include="src\voxelization.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\block_on.cpp" />
+    <None Include="src\main.py" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\main.py" />
+    <ClCompile Include="src\block_on.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

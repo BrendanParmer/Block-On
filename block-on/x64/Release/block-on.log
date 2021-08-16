@@ -2,6 +2,6 @@
      Creating library C:\Users\bjpar\Documents\GitHub\Block-On\block-on\x64\Release\block_on.lib and object C:\Users\bjpar\Documents\GitHub\Block-On\block-on\x64\Release\block_on.exp
   Generating code
   Previous IPDB not found, fall back to full compilation.
-  All 2245 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 2290 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   block-on.vcxproj -> C:\Users\bjpar\Documents\GitHub\Block-On\block-on\x64\Release\block_on.dll

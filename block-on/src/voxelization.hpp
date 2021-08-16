@@ -20,7 +20,6 @@ TODO
 #ifndef VOXELIZATION_H
 #define VOXELIZATION_H
 
-//I hate doing the includes like this but I've been trying to configure Visual Studio for like five hours now lol
 #include "../glm-master/glm/glm.hpp"
 #include "../glm-master/glm/gtc/type_ptr.hpp"
 
@@ -36,6 +35,7 @@ void init(uint8_t setDepth);
 void voxelizeTriangle(float x0, float y0, float z0,
 					  float x1, float y1, float z1,
 					  float x2, float y2, float z2);
+//void voxelizeTriangle(glm::ivec3 p0, glm::ivec3 p1, glm::ivec3 p2);
 
 glm::ivec3 voxelizePoint(glm::vec3 p);
 glm::ivec3 voxelizePoint(float x, float y, float z);
@@ -62,7 +62,7 @@ int smallIntPow(int x, uint8_t p); //from math.h
 //variables
 uint8_t depth = 6;
 Octnode* root = new Octnode(glm::ivec3(0, 0, 0), NULL);
-uint8_t MAX_DEPTH = 8;
+uint8_t MAX_DEPTH = 10;
 
 void init(uint8_t setDepth = 6)
 {
@@ -119,6 +119,16 @@ void voxelizeTriangle(float x0, float y0, float z0,
 	delete& E1;
 	delete& E2;
 }
+
+/**
+* Overloaded function that allows for glm::vec3 inputs
+*/
+//void voxelizeTriangle(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2)
+//{
+//	voxelizeTriangle(p0.x, p0.y, p0.z,
+//					 p1.x, p1.y, p1.z,
+//					 p2.x, p2.y, p2.z);
+//}
 
 /*
 *	Function to assign a 3D vector composed of floats to a voxel
@@ -230,7 +240,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 							  abs(dP.x * dP.y));
 	glm::ivec3 L = M;
 	glm::ivec3 currentP = P0;
-	while (currentP != P1)
+	while (currentP.x != P1.x && currentP.y != P1.y && currentP.z != P1.z) //probably should do this better
 	{
 		//find axis with minimum distance to next voxel region face
 		unsigned int min = 0;
@@ -267,7 +277,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 		abs(dP.x * dP.y));
 	glm::ivec3 L = M;
 	glm::ivec3 currentP = P0;
-	while (currentP != P1)
+	while (currentP.x != P1.x && currentP.y != P1.y && currentP.z != P1.z)
 	{
 		//find axis with minimum distance to next voxel region face
 		unsigned int min = 0;
@@ -347,6 +357,8 @@ void fillInterior(std::list<glm::ivec3> E0,
 			U1 = last1.x;
 			V1 = last1.y;
 		}
+		else
+			throw std::invalid_argument("Dominant Axis must be 0, 1, or 2");
 
 		while (itSliceE0 != sliceE0.end() && itSliceE1 != sliceE1.end())
 		{

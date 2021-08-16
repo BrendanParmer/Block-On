@@ -1,2 +1,0 @@
-C:\Users\bjpar\Documents\GitHub\Block-On\block-on\x64\Debug\block-on.exe
-C:\Users\bjpar\Documents\GitHub\Block-On\block-on\x64\Debug\block-on.pdb
