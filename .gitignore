@@ -4,3 +4,5 @@ build/
 .vscode/
 Tests/
 x64/
+python/
+Release/

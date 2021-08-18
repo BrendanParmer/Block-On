@@ -9,6 +9,7 @@ bl_info = {
 }
 
 import bpy
+import bmesh
 import block_on as bo
 
 class BlockOn(bpy.types.Operator):
@@ -41,18 +42,43 @@ class BlockOn(bpy.types.Operator):
         orig_obj.hide_render = True
         orig_obj.hide_set(True)
         
-
+        #make sure all faces are triangles
+        bpy.ops.object.modifier_add(type='TRIANGULATE')
+        bpy.ops.object.modifier_apply(modifier = 'Triangulate')
+        
         #voxelization
         bo.init(6); #should be height but testing
         mesh = blocky_obj.data
-        mesh.calc_loop_triangles()
+        """mesh.calc_loop_triangles()
         for tri in mesh.loop_triangles:
             p0 = mesh.vertices[tri.vertices[0]].co
             p1 = mesh.vertices[tri.vertices[1]].co
             p2 = mesh.vertices[tri.vertices[2]].co
             bo.vox_tri(p0.x, p0.y, p0.z,
                        p1.x, p1.y, p1.z,
+                       p2.x, p2.y, p2.z)"""
+                       
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        
+        print("Oh boy here we go")
+        
+        i = 0
+        for f in bm.faces:
+            p0 = f.verts[0].co
+            p1 = f.verts[1].co
+            p2 = f.verts[2].co    
+            
+            if i == 952 or i == 568 or i == 967:
+                print("p0 = (" + str(p0.x) + ", " + str(p0.y) + ", " + str(p0.z) + ")")
+                print("p1 = (" + str(p1.x) + ", " + str(p1.y) + ", " + str(p1.z) + ")")
+                print("p2 = (" + str(p2.x) + ", " + str(p2.y) + ", " + str(p2.z) + ")")
+            bo.vox_tri(p0.x, p0.y, p0.z,
+                       p1.x, p1.y, p1.z,
                        p2.x, p2.y, p2.z)
+            print("Triangle " + str(i) + " voxelized")
+            i += 1
+            print("Voxelizing Triangle " + str(i))
                              
         return {'FINISHED'}
     

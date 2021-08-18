@@ -40,10 +40,13 @@ void voxelizeTriangle(float x0, float y0, float z0,
 glm::ivec3 voxelizePoint(glm::vec3 p);
 glm::ivec3 voxelizePoint(float x, float y, float z);
 
+bool pointEquals(glm::ivec3 P0, glm::ivec3 P1);
+
 axis dominantAxis(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2);
 void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis anAxis);
 
 void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list);
+void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root);
 
 void fillInterior(std::list<glm::ivec3> E1, 
 				  std::list<glm::ivec3> E2, 
@@ -53,7 +56,7 @@ void fillInterior(std::list<glm::ivec3> E1,
 std::list<glm::ivec3> getSubSequence(std::list<glm::ivec3>::iterator it, axis w, int compare);
 bool lineCondition(glm::ivec3 point, axis w, int dU, int dV, int U, int V);
 
-void addVoxelToOctree(glm::ivec3 P, uint8_t depth, Octnode root);
+void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode root);
 
 int smallIntPow(int x, uint8_t p); //from math.h
 
@@ -83,52 +86,79 @@ void voxelizeTriangle(float x0, float y0, float z0,
 	glm::ivec3 P1 = voxelizePoint(x1, y1, z1);
 	glm::ivec3 P2 = voxelizePoint(x2, y2, z2);
 	
-	axis domAxis = dominantAxis(P0, P1, P2);
-	sortThreeIntPoints(P0, P1, P2, domAxis);
-
-	//establishes edge voxels in a linked list
-	std::list<glm::ivec3> E0;
-	std::list<glm::ivec3> E1;
-	std::list<glm::ivec3> E2;
-
-	ILV(P0, P1, E0);
-	ILV(P0, P2, E1);
-	ILV(P1, P2, E2);
-
-	delete &P0;
-	delete &P1;
-	delete &P2;
-
-	for (const glm::ivec3 &x : E0)
+	std::cout << "Points voxelized\n";
+	//check if any of our voxels are the same to save computation time
+	if (pointEquals(P0, P1))
 	{
-		addVoxelToOctree(x, depth, *root);
+		std::cout << "Some points are equal\n";
+		if (pointEquals(P0, P2))
+		{
+			std::cout << "All vertices are the same. Adding voxel to octree...\n";
+			addVoxelToOctree(P0, 0, depth, *root);
+		}
+		else
+		{
+			std::cout << "Creating line...\n";
+			ILV(P0, P2, *root);
+		}
+		std::cout << "Finished\n";
 	}
-	for (const glm::ivec3 &x : E1)
+	else if (pointEquals(P0, P2) || pointEquals(P1, P2))
 	{
-		addVoxelToOctree(x, depth, *root);
+		std::cout << "Some points are equal\nCreating line...\n";
+		ILV(P0, P1, *root);
+		std::cout << "Finished\n";
 	}
-	//creates hybrid edge
-	for (const glm::ivec3 &x : E2)
+	else //our voxels are all distinct
 	{
-		addVoxelToOctree(x, depth, *root);
-		E0.push_back(x);
-	}
-	fillInterior(E0, E1, P0, P2, domAxis);
+		std::cout << "Vertices are distinct\n";
+		axis domAxis = dominantAxis(P0, P1, P2);
+		std::cout << "Determined dominant axis\n";
+		sortThreeIntPoints(P0, P1, P2, domAxis);
+		std::cout << "Points are sorted\n";
 
-	delete& E0;
-	delete& E1;
-	delete& E2;
+		//establishes edge voxels in a linked list
+		std::list<glm::ivec3> E0;
+		std::list<glm::ivec3> E1;
+		std::list<glm::ivec3> E2;
+
+		ILV(P0, P1, E0);
+		ILV(P0, P2, E1);
+		ILV(P1, P2, E2);
+		std::cout << "Edge voxels are calculated\n";
+
+		for (const glm::ivec3& x : E0)
+		{
+			addVoxelToOctree(x, 0, depth, *root);
+		}
+		std::cout << "Edge 0 voxels are added to octree\n";
+		for (const glm::ivec3& x : E1)
+		{
+			addVoxelToOctree(x, 0, depth, *root);
+		}
+		std::cout << "Edge 1 voxels are added to octree\n";
+		//creates hybrid edge
+		for (const glm::ivec3& x : E2)
+		{
+			addVoxelToOctree(x, 0, depth, *root);
+			E0.push_back(x);
+		}
+		std::cout << "Edge 2 voxels are added to octree\n";
+		fillInterior(E0, E1, P0, P2, domAxis);
+		std::cout << "Interior filled\n";
+		std::cout << "Finished\n";
+	}
 }
 
 /**
 * Overloaded function that allows for glm::vec3 inputs
 */
-//void voxelizeTriangle(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2)
-//{
-//	voxelizeTriangle(p0.x, p0.y, p0.z,
-//					 p1.x, p1.y, p1.z,
-//					 p2.x, p2.y, p2.z);
-//}
+/*void voxelizeTriangle(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2)
+{
+	voxelizeTriangle(p0.x, p0.y, p0.z,
+					 p1.x, p1.y, p1.z,
+					 p2.x, p2.y, p2.z);
+}*/
 
 /*
 *	Function to assign a 3D vector composed of floats to a voxel
@@ -153,6 +183,15 @@ glm::ivec3 voxelizePoint(float x, float y, float z)
 					  static_cast<int>(z + 0.5f));
 }
 
+/**
+* Returns true if the two voxels are the same
+* glm::ivec3 P0, P1 - the two voxels being compared
+*/
+bool pointEquals(glm::ivec3 P0, glm::ivec3 P1)
+{
+	return P0.x = P1.x && P0.y == P1.y && P0.z == P1.z;
+}
+
 /*
 *	approximates the dominant axis by taking the cross product of the 
 *	integer approximations of the edge vectors, determined by voxelized
@@ -172,32 +211,18 @@ axis dominantAxis(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2)
 		max = y;
 	int z = E0.x * E1.y - E0.y * E1.x;
 
-	delete& E0;
-	delete& E1;
 	if (max < z)
 		max = z;
 
 	if (max == x) {
-		delete& max;
-		delete& x;
-		delete& y;
-		delete& z;
 		return 0;
 	}
 	if (max == y)
 	{
-		delete& max;
-		delete& x;
-		delete& y;
-		delete& z;
 		return 1;
 	}
 	if (max == z)
 	{
-		delete& max;
-		delete& x;
-		delete& y;
-		delete& z;
 		return 2;
 	}
 	else
@@ -206,6 +231,7 @@ axis dominantAxis(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2)
 		return 0;
 	}
 }
+
 /*
 	helper function that reassigns ordering based on a given axis
 	
@@ -253,12 +279,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 		L -= glm::ivec3(L[min], L[min], L[min]);
 		L[min] = 2 * M[min];
 		list.push_back(currentP);
-		delete& min;
 	}
-	delete& dP;
-	delete& M;
-	delete& L;
-	delete& currentP;
 }
 
 /*
@@ -289,13 +310,8 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 		currentP[min] += dP[min];
 		L -= glm::ivec3(L[min], L[min], L[min]);
 		L[min] = 2 * M[min];
-		addVoxelToOctree(currentP, depth, root);
-		delete& min;
+		addVoxelToOctree(currentP, 0, depth, root);
 	}
-	delete& dP;
-	delete& M;
-	delete& L;
-	delete& currentP;
 }
 
 /*
@@ -316,15 +332,21 @@ void fillInterior(std::list<glm::ivec3> E0,
 				 glm::ivec3 P2, 
 				 axis domAxis)
 {
+	if (domAxis < 0 || domAxis > 2)
+		throw std::invalid_argument("Dominant axis must be 0, 1, or 2");
+
+	
 	std::list<glm::ivec3>::iterator itE0 = E0.begin();
 	std::list<glm::ivec3>::iterator itE1 = E1.begin();
 
+	std::cout << "Starting to slice...\n";
 	//splices triangle into 2D splices based on the dominant axis
 	for (uint16_t i = 0; i < P2[domAxis] - P0[domAxis]; i++)
 	{
 		int slice = P0[domAxis] + i;
-
+		std::cout << "Getting first subsequence...\n";
 		std::list<glm::ivec3> sliceE0 = getSubSequence(itE0, domAxis, slice);
+		std::cout << "Getting second subsequence...\n";
 		std::list<glm::ivec3> sliceE1 = getSubSequence(itE1, domAxis, slice);
 
 		std::list<glm::ivec3>::iterator itSliceE0 = sliceE0.begin();
@@ -399,22 +421,7 @@ void fillInterior(std::list<glm::ivec3> E0,
 		}
 
 		ILV(*sliceE0.end(), *sliceE1.end(), *root);
-
-		delete& slice;
-		delete& sliceE0;
-		delete& sliceE1;
-		delete& itSliceE0;
-		delete& itSliceE1;
-		delete& last0;
-		delete& last1;
-
-		delete& U0;
-		delete& V0;
-		delete& U1;
-		delete& V1;
 	}
-	delete& itE0;
-	delete& itE1;
 }
 
 /*
@@ -427,6 +434,7 @@ void fillInterior(std::list<glm::ivec3> E0,
 std::list<glm::ivec3> getSubSequence(std::list<glm::ivec3>::iterator it, axis w, int compare)
 {
 	std::list<glm::ivec3> subsequence;
+	std::cout << "Dominant axis: " << std::to_string(w) << '\n';
 	//not happy with this, it's not very clean
 	if (w == 0) //dom axis = x
 	{
@@ -436,7 +444,7 @@ std::list<glm::ivec3> getSubSequence(std::list<glm::ivec3>::iterator it, axis w,
 			std::advance(it, 1);
 		}
 	}
-	if (w == 1) //dom axis = y
+	else if (w == 1) //dom axis = y
 	{
 		while (it->y == compare)
 		{
@@ -444,7 +452,7 @@ std::list<glm::ivec3> getSubSequence(std::list<glm::ivec3>::iterator it, axis w,
 			std::advance(it, 1);
 		}
 	}
-	if (w == 2) //dom axis = z
+	else if (w == 2) //dom axis = z
 	{
 		while (it->z == compare)
 		{
@@ -494,13 +502,6 @@ bool lineCondition(glm::ivec3 point, axis w, int dU, int dV, int U, int V)
 
 	int compare = dV * u - dU * v;
 	return (m - n <= compare && compare <= m + n);
-
-	delete& m;
-	delete& n;
-	delete& compare;
-	delete& u;
-	delete& v;
-	
 }
 
 /*
@@ -510,7 +511,7 @@ bool lineCondition(glm::ivec3 point, axis w, int dU, int dV, int U, int V)
 	uint8_t depth: user-defined depth of the octree
 	Octnode root: the root of our octree, used for easy level of detail calculations
 */
-void addVoxelToOctree(glm::ivec3 P, uint8_t depth, Octnode root)
+void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 {
 	//bitwise little thing to keep track of which octant our point is in 
 	//relative to the main node's coordinate
@@ -518,17 +519,19 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t depth, Octnode root)
 	// x = 4 (100), y = 2 (010), and z = 1 (001)
 	//if the point's x-coordinate is greater than the main node's, then we put a 1 in the 4 spot
 	//this helps us avoid messy, long chains of if statements
+	std::cout << "Setting up initial variable a...\n";
 	uint8_t a = 0;
 
-	Octnode main = root; //root's parent is NULL
-
-	uint8_t i = 1;
-	while (i < depth)
+	std::cout << "Level is: " << level << " out of " << depth << "\n";
+	if (level < depth)
 	{
 		//determines relative octant and sets a new point
-		int half = smallIntPow(2, depth - 1 - i);
+		std::cout << "Determining half...\n";
+		int half = smallIntPow(2, depth - 1 - level);
+		std::cout << "Setting up newPoint...\n";
 		glm::ivec3 newPoint = main.coordinate;
 
+		std::cout << "Determining x-axis placement...\n";
 		//x
 		if (P.x > main.coordinate.x)
 		{
@@ -538,6 +541,7 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t depth, Octnode root)
 		else
 			newPoint.x -= half;
 
+		std::cout << "Determining y-axis placement...\n";
 		//y
 		if (P.y > main.coordinate.y)
 		{
@@ -547,6 +551,7 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t depth, Octnode root)
 		else
 			newPoint.y -= half;
 		
+		std::cout << "Determining z-axis placement...\n";
 		//z
 		if (P.z > main.coordinate.z)\
 		{
@@ -556,28 +561,16 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t depth, Octnode root)
 		else
 			newPoint.z -= half;
 
-		delete& half;
-
 		//assign child
-		if (i == 1)
+		std::cout << "Assigning child...\n";
+		if (main.children[a] == NULL)
 		{
-			if (root.children[a] == NULL)
-				root.children[a] = new Octnode(newPoint, &main);
-			main = *root.children[a]; //doesn't seem good
+			std::cout << "Creating new Octnode for child...\n";
+			main.children[a] = new Octnode(newPoint, &main);
+			std::cout << "Creation successful\n";
 		}
-		else
-		{
-			if (main.children[a] == NULL)
-				main.children[a] = new Octnode(newPoint, &main);
-			main = *main.children[a];
-		}
-
-		delete& newPoint;
-		i++;
+		std::cout << "Onto the next layer in the tree\n";
+		addVoxelToOctree(P, level + 1, depth, *main.children[a]);
 	}
-
-	delete& a;
-	delete& main;
-	delete& i;
 }
 #endif
