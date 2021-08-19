@@ -2,6 +2,7 @@
 #include <Python.h>
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include "voxelization.hpp"
 namespace py = pybind11;
 
@@ -27,6 +28,10 @@ PYBIND11_MODULE(block_on, m)
             py::arg("x1"), py::arg("y1"), py::arg("z1"),
             py::arg("x2"), py::arg("y2"), py::arg("z2"));
     m.def("init", &init, "Set up octree and initialize depth", py::arg("depth") = 6);
+    m.def("end", &end, "Return all voxels in mesh");
     m.def("test", &test);
     m.def("PyInit_block_on", &PyInit_block_on); //necessary?
+    
+    py::class_<glm::ivec3>(m, "ivec3")
+        .def(py::init<int, int, int>());
 }

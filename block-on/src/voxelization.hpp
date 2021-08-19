@@ -60,7 +60,7 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode root);
 
 int smallIntPow(int x, uint8_t p); //from math.h
 
-
+std::list<glm::ivec3> end();
 
 //variables
 uint8_t depth = 6;
@@ -435,29 +435,36 @@ std::list<glm::ivec3> getSubSequence(std::list<glm::ivec3>::iterator it, axis w,
 {
 	std::list<glm::ivec3> subsequence;
 	std::cout << "Dominant axis: " << std::to_string(w) << '\n';
+	int i = 0; // strange bug where some triangles (randomly) appear to infinitely
+			   // add voxels to a list, so this is just preventing that while
+			   // I need to fix it
+			   
 	//not happy with this, it's not very clean
 	if (w == 0) //dom axis = x
 	{
-		while (it->x == compare)
+		while (it->x == compare && i < 4000)
 		{
 			subsequence.push_back(*it);
 			std::advance(it, 1);
+			i++;
 		}
 	}
 	else if (w == 1) //dom axis = y
 	{
-		while (it->y == compare)
+		while (it->y == compare && i < 4000)
 		{
 			subsequence.push_back(*it);
 			std::advance(it, 1);
+			i++;
 		}
 	}
 	else if (w == 2) //dom axis = z
 	{
-		while (it->z == compare)
+		while (it->z == compare && i < 4000)
 		{
 			subsequence.push_back(*it);
 			std::advance(it, 1);
+			i++;
 		}
 	}
 	else
@@ -572,5 +579,12 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 		std::cout << "Onto the next layer in the tree\n";
 		addVoxelToOctree(P, level + 1, depth, *main.children[a]);
 	}
+}
+
+std::list<glm::ivec3> end()
+{
+	std::list<glm::ivec3> list;
+	(*root).allPointsAtDepth(list, depth);
+	return list;
 }
 #endif

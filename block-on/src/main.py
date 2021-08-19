@@ -11,6 +11,7 @@ bl_info = {
 import bpy
 import bmesh
 import block_on as bo
+from mathutils import Matrix
 
 class BlockOn(bpy.types.Operator):
     #Block On
@@ -69,16 +70,33 @@ class BlockOn(bpy.types.Operator):
             p1 = f.verts[1].co
             p2 = f.verts[2].co    
             
-            if i == 952 or i == 568 or i == 967:
-                print("p0 = (" + str(p0.x) + ", " + str(p0.y) + ", " + str(p0.z) + ")")
-                print("p1 = (" + str(p1.x) + ", " + str(p1.y) + ", " + str(p1.z) + ")")
-                print("p2 = (" + str(p2.x) + ", " + str(p2.y) + ", " + str(p2.z) + ")")
+            print("\n\nVoxelizing Triangle " + str(i) + ":")
+            print("p0 = (" + str(p0.x) + ", " + str(p0.y) + ", " + str(p0.z) + ")")
+            print("p1 = (" + str(p1.x) + ", " + str(p1.y) + ", " + str(p1.z) + ")")
+            print("p2 = (" + str(p2.x) + ", " + str(p2.y) + ", " + str(p2.z) + ")\n")
             bo.vox_tri(p0.x, p0.y, p0.z,
                        p1.x, p1.y, p1.z,
                        p2.x, p2.y, p2.z)
             print("Triangle " + str(i) + " voxelized")
             i += 1
-            print("Voxelizing Triangle " + str(i))
+
+        print("\nAll triangles voxelized\nRetrieving points from octree")
+        points = bo.end()
+        print("Points retrieved.\nAdding cubes...\n")
+        
+        for point in points:
+            print("(" + str(point.x) + ", " + str(point.y) + ", " + str(point.z) + ")")
+            transform = mathutils.Matrix.Translation((point.x + 0.5, point.y + 0.5, point.z + 0.5))
+            bmesh.ops.create_cube(
+                bm,
+                1.0,
+                transform,
+                false
+            )
+        print("Cubes added to bmesh\n")
+        bm.to_mesh(mesh)
+        bm.free()
+        print("Script executed.")
                              
         return {'FINISHED'}
     

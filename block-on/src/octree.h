@@ -44,9 +44,24 @@ public:
 		node6 = nullptr;
 		node7 = nullptr;
 	}
-
-	std::list<glm::ivec3> allPointsAtDepth(uint8_t depth)
+	void allPointsAtDepth(std::list<glm::ivec3> list, uint8_t depth)
 	{
+		if (depth == 0)
+		{
+			for (uint8_t i = 0; i < 8; i++)
+			{
+				if (children[i] != nullptr)
+					list.push_back(children[i]->coordinate);
+			}
+		}
+		else
+		{
+			for (uint8_t i = 0; i < 8; i++)
+			{
+				if (children[i] != nullptr)
+					(*children[i]).allPointsAtDepth(list, depth - 1);
+			}
+		}
 	}
 };
 
