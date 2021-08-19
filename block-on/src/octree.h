@@ -10,14 +10,14 @@ public:
 	glm::ivec3 coordinate;
 	Octnode* parent;
 	//probably better way of doing this
-	Octnode* node0;
-	Octnode* node1;
-	Octnode* node2;
-	Octnode* node3;
-	Octnode* node4;
-	Octnode* node5;
-	Octnode* node6;
-	Octnode* node7;
+	Octnode* node0; // (-x, -y, -z)
+	Octnode* node1; // (-x, -y, +z)
+	Octnode* node2; // (-x, +y, -z)
+	Octnode* node3; // (-x, +y, +z)
+	Octnode* node4; // (+x, -y, -z)
+	Octnode* node5; // (+x, -y, +z)
+	Octnode* node6; // (+x, +y, -z)
+	Octnode* node7; // (+x, +y, +z)
 
 	Octnode* children[8] = {
 		node0,
@@ -35,14 +35,18 @@ public:
 		coordinate = setCoordinate;
 		parent = setParent;
 
-		node0 = NULL;
-		node1 = NULL;
-		node2 = NULL;
-		node3 = NULL;
-		node4 = NULL;
-		node5 = NULL;
-		node6 = NULL;
-		node7 = NULL;
+		node0 = nullptr;
+		node1 = nullptr;
+		node2 = nullptr;
+		node3 = nullptr;
+		node4 = nullptr;
+		node5 = nullptr;
+		node6 = nullptr;
+		node7 = nullptr;
+	}
+
+	std::list<glm::ivec3> allPointsAtDepth(uint8_t depth)
+	{
 	}
 };
 
