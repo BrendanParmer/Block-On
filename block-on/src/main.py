@@ -12,6 +12,7 @@ import bpy
 import bmesh
 import block_on as bo
 from mathutils import Matrix
+import time
 
 class BlockOn(bpy.types.Operator):
     #Block On
@@ -22,6 +23,7 @@ class BlockOn(bpy.types.Operator):
     height: bpy.props.IntProperty(name = "Height", default = 6, min = 1, max = 8)
 
     def execute(self, context):
+        start_time = time.time()
         scene = context.scene
         orig_name = bpy.context.object.name
         orig_obj = bpy.data.objects[orig_name]
@@ -71,9 +73,18 @@ class BlockOn(bpy.types.Operator):
             p2 = f.verts[2].co    
             
             print("\n\nVoxelizing Triangle " + str(i) + ":")
-            print("p0 = (" + str(p0.x) + ", " + str(p0.y) + ", " + str(p0.z) + ")")
-            print("p1 = (" + str(p1.x) + ", " + str(p1.y) + ", " + str(p1.z) + ")")
-            print("p2 = (" + str(p2.x) + ", " + str(p2.y) + ", " + str(p2.z) + ")\n")
+            print("p0 = (" + str(round(p0.x, 3)) + ", " + 
+                             str(round(p0.y, 3)) + ", " + 
+                             str(round(p0.z, 3)) + ")")
+                             
+            print("p1 = (" + str(round(p1.x, 3)) + ", " + 
+                             str(round(p1.y, 3)) + ", " + 
+                             str(round(p1.z, 3)) + ")")
+                             
+            print("p2 = (" + str(round(p2.x, 3)) + ", " + 
+                             str(round(p2.y, 3)) + ", " + 
+                             str(round(p2.z, 3)) + ")\n")
+                             
             bo.vox_tri(p0.x, p0.y, p0.z,
                        p1.x, p1.y, p1.z,
                        p2.x, p2.y, p2.z)
@@ -96,8 +107,8 @@ class BlockOn(bpy.types.Operator):
         print("Cubes added to bmesh\n")
         bm.to_mesh(mesh)
         bm.free()
-        print("Script executed.")
-                             
+        print("Script finished execution.")
+        print("It too %s seconds" % (time.time() - start_time))                     
         return {'FINISHED'}
     
 def menu_func(self, context):

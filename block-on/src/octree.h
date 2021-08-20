@@ -3,6 +3,7 @@
 
 #include "../glm-master/glm/glm.hpp"
 #include "../glm-master/glm/gtc/type_ptr.hpp"
+#include "voxelization.hpp"
 
 class Octnode
 {
@@ -53,9 +54,8 @@ public:
 				if (children[i] != nullptr)
 				{
 					list.push_back(children[i]->coordinate);
-					std::cout << "(" << std::to_string(children[i]->coordinate.x)
-						<< ", " << std::to_string(children[i]->coordinate.y)
-						<< ", " << std::to_string(children[i]->coordinate.z) << ")\n";
+					std::cout << "Adding " << i3_to_string(children[i]->coordinate) 
+						<< " to list\n";
 				}
 			}
 		}

@@ -61,6 +61,7 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode root);
 int smallIntPow(int x, uint8_t p); //from math.h
 
 std::list<glm::ivec3> end();
+std::string i3_to_string(glm::ivec3 P);
 
 //variables
 uint8_t depth = 6;
@@ -87,26 +88,32 @@ void voxelizeTriangle(float x0, float y0, float z0,
 	glm::ivec3 P2 = voxelizePoint(x2, y2, z2);
 	
 	std::cout << "Vertices voxelized\n";
+	std::cout << "New vertices\n" << "P0: " << i3_to_string(P0)
+		<< "\nP1: " << i3_to_string(P1)
+		<< "\nP2: " << i3_to_string(P2) << "\n";
 	//check if any of our voxels are the same to save computation time
 	if (pointEquals(P0, P1))
 	{
-		std::cout << "Some points are equal\n";
 		if (pointEquals(P0, P2))
 		{
-			std::cout << "All vertices are the same. Adding voxel to octree...\n";
-			std::cout << "Adding point " << i3_to_string(P0) << " to octree";
+			std::cout << "All vertices are the same.\n";
+			std::cout << "Adding point " << i3_to_string(P0) << " to octree\n";
 			addVoxelToOctree(P0, 0, depth, *root);
 		}
 		else
 		{
-			std::cout << "Creating line...\n";
+			std::cout << "Some points are equal\n";
+			std::cout << "Creating line from " << i3_to_string(P0) << 
+				" to " << i3_to_string(P2) << " ...\n";
 			ILV(P0, P2, *root);
 		}
 		std::cout << "Finished\n";
 	}
 	else if (pointEquals(P0, P2) || pointEquals(P1, P2))
 	{
-		std::cout << "Some points are equal\nCreating line...\n";
+		std::cout << "Some points are equal\n";
+		std::cout << "Creating line from " << i3_to_string(P0) <<
+			" to " << i3_to_string(P1) << " ...\n";
 		ILV(P0, P1, *root);
 		std::cout << "Finished\n";
 	}
@@ -130,20 +137,20 @@ void voxelizeTriangle(float x0, float y0, float z0,
 
 		for (const glm::ivec3& x : E0) //these aren't running
 		{
-			std::cout << "Adding point " << i3_to_string(x) << " to octree";
+			std::cout << "Adding point " << i3_to_string(x) << " to octree\n";
 			addVoxelToOctree(x, 0, depth, *root);
 		}
 		std::cout << "Edge 0 voxels are added to octree\n";
 		for (const glm::ivec3& x : E1)
 		{
-			std::cout << "Adding point " << i3_to_string(x) << " to octree";
+			std::cout << "Adding point " << i3_to_string(x) << " to octree\n";
 			addVoxelToOctree(x, 0, depth, *root);
 		}
 		std::cout << "Edge 1 voxels are added to octree\n";
 		//creates hybrid edge
 		for (const glm::ivec3& x : E2)
 		{
-			std::cout << "Adding point " << i3_to_string(x) << " to octree";
+			std::cout << "Adding point " << i3_to_string(x) << " to octree\n";
 			addVoxelToOctree(x, 0, depth, *root);
 			E0.push_back(x);
 		}
@@ -171,9 +178,9 @@ void voxelizeTriangle(float x0, float y0, float z0,
 */
 glm::ivec3 voxelizePoint(glm::vec3 p)
 {
-	return glm::ivec3(static_cast<int>(p.x + 0.5f),
-					  static_cast<int>(p.y + 0.5f),
-					  static_cast<int>(p.z + 0.5f));
+	return glm::ivec3(round(p.x),
+					  round(p.y),
+					  round(p.z));
 }
 
 /**
@@ -182,9 +189,7 @@ glm::ivec3 voxelizePoint(glm::vec3 p)
 */
 glm::ivec3 voxelizePoint(float x, float y, float z)
 {
-	return glm::ivec3(static_cast<int>(x + 0.5f),
-					  static_cast<int>(y + 0.5f),
-					  static_cast<int>(z + 0.5f));
+	return glm::ivec3(round(x), round(y), round(z));
 }
 
 /**
@@ -193,7 +198,7 @@ glm::ivec3 voxelizePoint(float x, float y, float z)
 */
 bool pointEquals(glm::ivec3 P0, glm::ivec3 P1)
 {
-	return P0.x = P1.x && P0.y == P1.y && P0.z == P1.z;
+	return P0.x == P1.x && P0.y == P1.y && P0.z == P1.z;
 }
 
 /*
@@ -314,7 +319,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 		currentP[min] += dP[min];
 		L -= glm::ivec3(L[min], L[min], L[min]);
 		L[min] = 2 * M[min];
-		std::cout << "Adding point " << i3_to_string(currentP) << " to octree";
+		std::cout << "Adding point " << i3_to_string(currentP) << " to octree\n";
 		addVoxelToOctree(currentP, 0, depth, root);
 	}
 }
@@ -349,7 +354,7 @@ void fillInterior(std::list<glm::ivec3> E0,
 	for (uint16_t i = 0; i < P2[domAxis] - P0[domAxis]; i++)
 	{
 		int slice = P0[domAxis] + i;
-		std::cout << "Calculating at axis " << std::to_string(domAxis) << std::to_string(slice) << ".";
+		std::cout << "Calculating at axis " << std::to_string(domAxis) << std::to_string(slice) << ".\n";
 		std::cout << "Getting first subsequence...\n";
 		std::list<glm::ivec3> sliceE0 = getSubSequence(itE0, domAxis, slice);
 		std::cout << "Getting second subsequence...\n";
@@ -358,7 +363,8 @@ void fillInterior(std::list<glm::ivec3> E0,
 		std::list<glm::ivec3>::iterator itSliceE0 = sliceE0.begin();
 		std::list<glm::ivec3>::iterator itSliceE1 = sliceE1.begin();
 		
-		std::cout << "Calculating line from " << i3_to_string(*itSliceE0) << " to " << i3_to_string(*itSliceE1);
+		std::cout << "Calculating line from " << i3_to_string(*itSliceE0) 
+			<< " to " << i3_to_string(*itSliceE1) << ".\n";
 		ILV(*itSliceE0, *itSliceE1, *root);
 		
 		glm::ivec3 last0 = *itSliceE0;
@@ -391,12 +397,14 @@ void fillInterior(std::list<glm::ivec3> E0,
 
 		while (itSliceE0 != sliceE0.end() && itSliceE1 != sliceE1.end())
 		{
-			if (lineCondition(*std::next(itSliceE0, 1), domAxis, U1 - U0, V1 - V0, U0, V0)) //TODO: add proper variables here
+			if (lineCondition(*std::next(itSliceE0, 1), domAxis, U1 - U0, V1 - V0, U0, V0)) 
 				std::advance(itSliceE0, 1);
 			else if (lineCondition(*std::next(itSliceE1, 1), domAxis, U1 - U0, V1 - V0, U0, V0))
 				std::advance(itSliceE1, 1);
 			else
 			{
+				std::cout << "Calculating line from " << i3_to_string(*itSliceE0) 
+					<< " to " << i3_to_string(*itSliceE1) << ".\n";
 				ILV(*itSliceE0, *itSliceE1, *root);
 				last0 = *itSliceE0;
 				last1 = *itSliceE1;
@@ -427,6 +435,8 @@ void fillInterior(std::list<glm::ivec3> E0,
 
 		}
 
+		std::cout << "Calculating line from " << i3_to_string(*sliceE0.end()) 
+			<< " to " << i3_to_string(*sliceE1.end()) << ".\n";
 		ILV(*sliceE0.end(), *sliceE1.end(), *root);
 	}
 }
