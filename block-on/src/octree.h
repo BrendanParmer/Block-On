@@ -5,6 +5,8 @@
 #include "../glm-master/glm/gtc/type_ptr.hpp"
 #include "voxelization.hpp"
 
+std::string i3_to_string(glm::ivec3 P); //from voxelization.hpp
+
 class Octnode
 {
 public:
@@ -47,6 +49,7 @@ public:
 	}
 	void allPointsAtDepth(std::list<glm::ivec3> list, uint8_t depth)
 	{
+		std::cout << "Depth: " << std::to_string(depth) << "\n";
 		if (depth == 0)
 		{
 			for (uint8_t i = 0; i < 8; i++)

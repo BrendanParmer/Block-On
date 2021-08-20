@@ -47,6 +47,7 @@ void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis anAxis
 
 void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list);
 void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root);
+int8_t sign(int num);
 
 void fillInterior(std::list<glm::ivec3> E1, 
 				  std::list<glm::ivec3> E2, 
@@ -63,12 +64,21 @@ int smallIntPow(int x, uint8_t p); //from math.h
 std::list<glm::ivec3> end();
 std::string i3_to_string(glm::ivec3 P);
 
+
+
+
+
+
 //variables
 uint8_t depth = 6;
 Octnode* root = new Octnode(glm::ivec3(0, 0, 0), NULL);
 uint8_t MAX_DEPTH = 10;
 
-void init(uint8_t setDepth = 6)
+
+
+
+
+void init(uint8_t setDepth)
 {
 	depth = setDepth;
 	Octnode* root = new Octnode(glm::ivec3(0, 0, 0), NULL);
@@ -88,9 +98,9 @@ void voxelizeTriangle(float x0, float y0, float z0,
 	glm::ivec3 P2 = voxelizePoint(x2, y2, z2);
 	
 	std::cout << "Vertices voxelized\n";
-	std::cout << "New vertices\n" << "P0: " << i3_to_string(P0)
-		<< "\nP1: " << i3_to_string(P1)
-		<< "\nP2: " << i3_to_string(P2) << "\n";
+	std::cout << "New vertices:\n" << "P0: " << i3_to_string(P0)
+		<< "    P1: " << i3_to_string(P1)
+		<< "    P2: " << i3_to_string(P2) << "\n";
 	//check if any of our voxels are the same to save computation time
 	if (pointEquals(P0, P1))
 	{
@@ -121,7 +131,7 @@ void voxelizeTriangle(float x0, float y0, float z0,
 	{
 		std::cout << "Vertices are distinct\n";
 		axis domAxis = dominantAxis(P0, P1, P2);
-		std::cout << "Determined dominant axis\n";
+		std::cout << "Dominant axis: " << std::to_string(domAxis) << "\n";
 		sortThreeIntPoints(P0, P1, P2, domAxis);
 		std::cout << "Points are sorted\n\n";
 
@@ -130,8 +140,11 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		std::list<glm::ivec3> E1;
 		std::list<glm::ivec3> E2;
 
+		std::cout << "\nILV P0-P1...\n";
 		ILV(P0, P1, E0);
+		std::cout << "\nILV P0-P2...\n";
 		ILV(P0, P2, E1);
+		std::cout << "\nIlv P1-P2...\n";
 		ILV(P1, P2, E2);
 		std::cout << "Edge voxels are calculated\n";
 
@@ -160,16 +173,6 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		std::cout << "Finished\n";
 	}
 }
-
-/**
-* Overloaded function that allows for glm::vec3 inputs
-*/
-/*void voxelizeTriangle(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2)
-{
-	voxelizeTriangle(p0.x, p0.y, p0.z,
-					 p1.x, p1.y, p1.z,
-					 p2.x, p2.y, p2.z);
-}*/
 
 /*
 *	Function to assign a 3D vector composed of floats to a voxel
@@ -267,6 +270,8 @@ void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis domAxi
 */
 void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 {
+	/*
+	* broke version
 	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
 							   P1.y - P0.y,
 							   P1.z - P0.z);
@@ -275,7 +280,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 							  abs(dP.x * dP.y));
 	glm::ivec3 L = M;
 	glm::ivec3 currentP = P0;
-	while (currentP.x != P1.x && currentP.y != P1.y && currentP.z != P1.z) //probably should do this better
+	while (!pointEquals(currentP, P1))
 	{
 		//find axis with minimum distance to next voxel region face
 		unsigned int min = 0;
@@ -287,7 +292,50 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 		currentP[min] += dP[min];
 		L -= glm::ivec3(L[min], L[min], L[min]);
 		L[min] = 2 * M[min];
+		std::cout << "Adding " << i3_to_string(currentP) << " to list\n";
 		list.push_back(currentP);
+	}
+	*/
+	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
+							   P1.y - P0.y,
+							   P1.z - P0.z);
+	glm::ivec3 sign_dP = glm::ivec3(sign(dP.x), sign(dP.y), sign(dP.z));
+
+	unsigned int orig_distance = abs(dP.x) + abs(dP.y) + abs(dP.z);
+	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
+							  abs(dP.x * dP.z),
+							  abs(dP.x * dP.y));
+	glm::ivec3 L = M;
+	glm::ivec3 currentP = P0;
+	int i = 0;
+	while (!pointEquals(currentP, P1) && i < 100)
+	{
+		unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
+		if (distance > orig_distance)
+		{
+			std::cout << "Error: Expect distance to decrease, but\n"
+				<< "Original distance: " << std::to_string(orig_distance)
+				<< "\nNew distance: " << std::to_string(distance) << "\n";
+			std::cout << "P0: " << i3_to_string(P0)
+				<< "\nP1: " << i3_to_string(P1)
+				<< "\nCurrentP: " << i3_to_string(currentP)
+				<< "\ndP: " << i3_to_string(dP) << "\n";
+			break;
+		}
+		//find axis with minimum distance to next voxel region face
+		uint8_t min = 0;
+		for (uint8_t i = 1; i < 3; i++)
+		{
+			if (L[i] < L[min])
+				min = i;
+		}
+		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(L[min]) << "\n";
+		currentP[min] += sign_dP[min];
+		L -= glm::ivec3(L[min], L[min], L[min]);
+		L[min] = 2 * M[min];
+		std::cout << "Adding " << i3_to_string(currentP) << " to list\n";
+		list.push_back(currentP);
+		i++;
 	}
 }
 
@@ -299,7 +347,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 */
 void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 {
-	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
+	/*glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
 		P1.y - P0.y,
 		P1.z - P0.z);
 	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
@@ -307,7 +355,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 		abs(dP.x * dP.y));
 	glm::ivec3 L = M;
 	glm::ivec3 currentP = P0;
-	while (currentP.x != P1.x && currentP.y != P1.y && currentP.z != P1.z)
+	while (!pointEquals(currentP, P1))
 	{
 		//find axis with minimum distance to next voxel region face
 		unsigned int min = 0;
@@ -322,8 +370,57 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 		std::cout << "Adding point " << i3_to_string(currentP) << " to octree\n";
 		addVoxelToOctree(currentP, 0, depth, root);
 	}
+	*/
+	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
+		P1.y - P0.y,
+		P1.z - P0.z);
+	glm::ivec3 sign_dP = glm::ivec3(sign(dP.x), sign(dP.y), sign(dP.z));
+	unsigned int orig_distance = abs(dP.x) + abs(dP.y) + abs(dP.z);
+	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
+		abs(dP.x * dP.z),
+		abs(dP.x * dP.y));
+	glm::ivec3 L = M;
+	glm::ivec3 currentP = P0;
+	int i = 0;
+	while (!pointEquals(currentP, P1) && i < 100)
+	{
+		unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
+		if (distance > orig_distance)
+		{
+			std::cout << "Error: Expect distance to decrease, but\n"
+				<< "Original distance: " << std::to_string(orig_distance)
+				<< "\nNew distance: " << std::to_string(distance) << "\n";
+			std::cout << "P0: " << i3_to_string(P0)
+				<< "\nP1: " << i3_to_string(P1)
+				<< "\nCurrentP: " << i3_to_string(currentP) << "\n";
+			break;
+		}
+		//find axis with minimum distance to next voxel region face
+		uint8_t min = 0;
+		for (uint8_t i = 1; i < 3; i++)
+		{
+			if (L[i] < L[min])
+				min = i;
+		}
+		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(L[min]) << "\n";
+		currentP[min] += sign_dP[min];
+		L -= glm::ivec3(L[min], L[min], L[min]);
+		L[min] = 2 * M[min];
+		std::cout << "Adding " << i3_to_string(currentP) << " to octree\n";
+		//addVoxelToOctree(currentP, 0, depth, root);
+		i++;
+	}
 }
 
+int8_t sign(int num)
+{
+	if (num > 0)
+		return 1;
+	else if (num < 0)
+		return -1;
+	else
+		return 0;
+}
 /*
 	function to fill the interior of the triangle
 
@@ -354,7 +451,8 @@ void fillInterior(std::list<glm::ivec3> E0,
 	for (uint16_t i = 0; i < P2[domAxis] - P0[domAxis]; i++)
 	{
 		int slice = P0[domAxis] + i;
-		std::cout << "Calculating at axis " << std::to_string(domAxis) << std::to_string(slice) << ".\n";
+		std::cout << "Calculating at axis " << std::to_string(domAxis) << 
+			": " << std::to_string(slice) << ".\n";
 		std::cout << "Getting first subsequence...\n";
 		std::list<glm::ivec3> sliceE0 = getSubSequence(itE0, domAxis, slice);
 		std::cout << "Getting second subsequence...\n";
@@ -451,7 +549,6 @@ void fillInterior(std::list<glm::ivec3> E0,
 std::list<glm::ivec3> getSubSequence(std::list<glm::ivec3>::iterator it, axis w, int compare)
 {
 	std::list<glm::ivec3> subsequence;
-	std::cout << "Dominant axis: " << std::to_string(w) << '\n';
 	int i = 0; // strange bug where some triangles (randomly) appear to infinitely
 			   // add voxels to a list, so this is just preventing that while
 			   // I need to fix it
@@ -537,16 +634,18 @@ bool lineCondition(glm::ivec3 point, axis w, int dU, int dV, int U, int V)
 */
 void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 {
-	//bitwise little thing to keep track of which octant our point is in 
-	//relative to the main node's coordinate
+	/**
+	bitwise little thing to keep track of which octant our point is in
+	relative to the main node's coordinate
 	
-	// x = 4 (100), y = 2 (010), and z = 1 (001)
-	//if the point's x-coordinate is greater than the main node's, then we put a 1 in the 4 spot
-	//this helps us avoid messy, long chains of if statements
+	 x = 4 (100), y = 2 (010), and z = 1 (001)
+	if the point's x-coordinate is greater than the main node's, then we put a 1 in the 4 spot
+	this helps us avoid messy, long chains of if statements
+	*/
 	//std::cout << "Setting up initial variable a...\n";
 	uint8_t a = 0;
 
-	//std::cout << "Level is: " << level << " out of " << depth << "\n";
+	std::cout << "Level is: " << std::to_string(level) << " out of " << std::to_string(depth) << "\n";
 	if (level < depth)
 	{
 		//determines relative octant and sets a new point
@@ -585,15 +684,18 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 		else
 			newPoint.z -= half;
 
+		std::cout << std::to_string(a) << '\n';
+		std::cout << i3_to_string(main.coordinate) << '\n';
 		//assign child
-		//std::cout << "Assigning child...\n";
-		if (main.children[a] == NULL)
+		std::cout << "Assigning child...\n";
+		if (main.children[a] == nullptr)
 		{
-			//std::cout << "Creating new Octnode for child...\n";
+			std::cout << "Creating new Octnode for child...\n";
 			main.children[a] = new Octnode(newPoint, &main);
-			//std::cout << "Creation successful\n";
+			std::cout << i3_to_string(main.children[a]->coordinate) << "\n";
+			std::cout << "Creation successful\n";
 		}
-		//std::cout << "Onto the next layer in the tree\n";
+		std::cout << "Onto the next layer in the tree\n";
 		addVoxelToOctree(P, level + 1, depth, *main.children[a]);
 	}
 }

@@ -11,7 +11,8 @@ bl_info = {
 import bpy
 import bmesh
 import block_on as bo
-from mathutils import Matrix
+import mathutils
+import math
 import time
 
 class BlockOn(bpy.types.Operator):
@@ -24,6 +25,10 @@ class BlockOn(bpy.types.Operator):
 
     def execute(self, context):
         start_time = time.time()
+        
+        height = 128
+        depth = math.floor(math.log2(height)) + 1
+        
         scene = context.scene
         orig_name = bpy.context.object.name
         orig_obj = bpy.data.objects[orig_name]
@@ -49,28 +54,26 @@ class BlockOn(bpy.types.Operator):
         bpy.ops.object.modifier_add(type='TRIANGULATE')
         bpy.ops.object.modifier_apply(modifier = 'Triangulate')
         
+        #determine max dimension of object
+        max = blocky_obj.dimensions.x
+        if (blocky_obj.dimensions.y > max):
+            max = blocky_obj.dimensions.y
+        if (blocky_obj.dimensions.z > max):
+            max = blocky_obj.dimensions.z  
+        s_factor = height/max
+
         #voxelization
-        bo.init(6); #should be height but testing
+        bo.init(depth);
         mesh = blocky_obj.data
-        """mesh.calc_loop_triangles()
-        for tri in mesh.loop_triangles:
-            p0 = mesh.vertices[tri.vertices[0]].co
-            p1 = mesh.vertices[tri.vertices[1]].co
-            p2 = mesh.vertices[tri.vertices[2]].co
-            bo.vox_tri(p0.x, p0.y, p0.z,
-                       p1.x, p1.y, p1.z,
-                       p2.x, p2.y, p2.z)"""
                        
         bm = bmesh.new()
         bm.from_mesh(mesh)
         
-        print("Oh boy here we go")
-        
         i = 0
         for f in bm.faces:
-            p0 = f.verts[0].co
-            p1 = f.verts[1].co
-            p2 = f.verts[2].co    
+            p0 = f.verts[0].co * s_factor
+            p1 = f.verts[1].co * s_factor
+            p2 = f.verts[2].co * s_factor  
             
             print("\n\nVoxelizing Triangle " + str(i) + ":")
             print("p0 = (" + str(round(p0.x, 3)) + ", " + 
@@ -90,6 +93,8 @@ class BlockOn(bpy.types.Operator):
                        p2.x, p2.y, p2.z)
             print("Triangle " + str(i) + " voxelized")
             i += 1
+            if (i > 1):
+                break
 
         print("\nAll triangles voxelized\nRetrieving points from octree")
         points = bo.end()
@@ -108,7 +113,7 @@ class BlockOn(bpy.types.Operator):
         bm.to_mesh(mesh)
         bm.free()
         print("Script finished execution.")
-        print("It too %s seconds" % (time.time() - start_time))                     
+        print("It took %s seconds" % (time.time() - start_time))                     
         return {'FINISHED'}
     
 def menu_func(self, context):
