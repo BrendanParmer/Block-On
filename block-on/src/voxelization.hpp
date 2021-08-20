@@ -86,7 +86,7 @@ void voxelizeTriangle(float x0, float y0, float z0,
 	glm::ivec3 P1 = voxelizePoint(x1, y1, z1);
 	glm::ivec3 P2 = voxelizePoint(x2, y2, z2);
 	
-	std::cout << "Points voxelized\n";
+	std::cout << "Vertices voxelized\n";
 	//check if any of our voxels are the same to save computation time
 	if (pointEquals(P0, P1))
 	{
@@ -94,6 +94,7 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		if (pointEquals(P0, P2))
 		{
 			std::cout << "All vertices are the same. Adding voxel to octree...\n";
+			std::cout << "Adding point " << i3_to_string(P0) << " to octree";
 			addVoxelToOctree(P0, 0, depth, *root);
 		}
 		else
@@ -115,7 +116,7 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		axis domAxis = dominantAxis(P0, P1, P2);
 		std::cout << "Determined dominant axis\n";
 		sortThreeIntPoints(P0, P1, P2, domAxis);
-		std::cout << "Points are sorted\n";
+		std::cout << "Points are sorted\n\n";
 
 		//establishes edge voxels in a linked list
 		std::list<glm::ivec3> E0;
@@ -127,23 +128,26 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		ILV(P1, P2, E2);
 		std::cout << "Edge voxels are calculated\n";
 
-		for (const glm::ivec3& x : E0)
+		for (const glm::ivec3& x : E0) //these aren't running
 		{
+			std::cout << "Adding point " << i3_to_string(x) << " to octree";
 			addVoxelToOctree(x, 0, depth, *root);
 		}
 		std::cout << "Edge 0 voxels are added to octree\n";
 		for (const glm::ivec3& x : E1)
 		{
+			std::cout << "Adding point " << i3_to_string(x) << " to octree";
 			addVoxelToOctree(x, 0, depth, *root);
 		}
 		std::cout << "Edge 1 voxels are added to octree\n";
 		//creates hybrid edge
 		for (const glm::ivec3& x : E2)
 		{
+			std::cout << "Adding point " << i3_to_string(x) << " to octree";
 			addVoxelToOctree(x, 0, depth, *root);
 			E0.push_back(x);
 		}
-		std::cout << "Edge 2 voxels are added to octree\n";
+		std::cout << "Edge 2 voxels are added to octree\n\n";
 		fillInterior(E0, E1, P0, P2, domAxis);
 		std::cout << "Interior filled\n";
 		std::cout << "Finished\n";
@@ -310,6 +314,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 		currentP[min] += dP[min];
 		L -= glm::ivec3(L[min], L[min], L[min]);
 		L[min] = 2 * M[min];
+		std::cout << "Adding point " << i3_to_string(currentP) << " to octree";
 		addVoxelToOctree(currentP, 0, depth, root);
 	}
 }
@@ -344,6 +349,7 @@ void fillInterior(std::list<glm::ivec3> E0,
 	for (uint16_t i = 0; i < P2[domAxis] - P0[domAxis]; i++)
 	{
 		int slice = P0[domAxis] + i;
+		std::cout << "Calculating at axis " << std::to_string(domAxis) << std::to_string(slice) << ".";
 		std::cout << "Getting first subsequence...\n";
 		std::list<glm::ivec3> sliceE0 = getSubSequence(itE0, domAxis, slice);
 		std::cout << "Getting second subsequence...\n";
@@ -352,6 +358,7 @@ void fillInterior(std::list<glm::ivec3> E0,
 		std::list<glm::ivec3>::iterator itSliceE0 = sliceE0.begin();
 		std::list<glm::ivec3>::iterator itSliceE1 = sliceE1.begin();
 		
+		std::cout << "Calculating line from " << i3_to_string(*itSliceE0) << " to " << i3_to_string(*itSliceE1);
 		ILV(*itSliceE0, *itSliceE1, *root);
 		
 		glm::ivec3 last0 = *itSliceE0;
@@ -526,19 +533,19 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 	// x = 4 (100), y = 2 (010), and z = 1 (001)
 	//if the point's x-coordinate is greater than the main node's, then we put a 1 in the 4 spot
 	//this helps us avoid messy, long chains of if statements
-	std::cout << "Setting up initial variable a...\n";
+	//std::cout << "Setting up initial variable a...\n";
 	uint8_t a = 0;
 
-	std::cout << "Level is: " << level << " out of " << depth << "\n";
+	//std::cout << "Level is: " << level << " out of " << depth << "\n";
 	if (level < depth)
 	{
 		//determines relative octant and sets a new point
-		std::cout << "Determining half...\n";
+		//std::cout << "Determining half...\n";
 		int half = smallIntPow(2, depth - 1 - level);
-		std::cout << "Setting up newPoint...\n";
+		//std::cout << "Setting up newPoint...\n";
 		glm::ivec3 newPoint = main.coordinate;
 
-		std::cout << "Determining x-axis placement...\n";
+		//std::cout << "Determining x-axis placement...\n";
 		//x
 		if (P.x > main.coordinate.x)
 		{
@@ -548,7 +555,7 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 		else
 			newPoint.x -= half;
 
-		std::cout << "Determining y-axis placement...\n";
+		//std::cout << "Determining y-axis placement...\n";
 		//y
 		if (P.y > main.coordinate.y)
 		{
@@ -558,7 +565,7 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 		else
 			newPoint.y -= half;
 		
-		std::cout << "Determining z-axis placement...\n";
+		//std::cout << "Determining z-axis placement...\n";
 		//z
 		if (P.z > main.coordinate.z)\
 		{
@@ -569,14 +576,14 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 			newPoint.z -= half;
 
 		//assign child
-		std::cout << "Assigning child...\n";
+		//std::cout << "Assigning child...\n";
 		if (main.children[a] == NULL)
 		{
-			std::cout << "Creating new Octnode for child...\n";
+			//std::cout << "Creating new Octnode for child...\n";
 			main.children[a] = new Octnode(newPoint, &main);
-			std::cout << "Creation successful\n";
+			//std::cout << "Creation successful\n";
 		}
-		std::cout << "Onto the next layer in the tree\n";
+		//std::cout << "Onto the next layer in the tree\n";
 		addVoxelToOctree(P, level + 1, depth, *main.children[a]);
 	}
 }
@@ -586,5 +593,12 @@ std::list<glm::ivec3> end()
 	std::list<glm::ivec3> list;
 	(*root).allPointsAtDepth(list, depth);
 	return list;
+}
+
+std::string i3_to_string(glm::ivec3 P)
+{
+	return "(" + std::to_string(P.x) + ", " + 
+				 std::to_string(P.y) + ", " + 
+				 std::to_string(P.z) + ")";
 }
 #endif

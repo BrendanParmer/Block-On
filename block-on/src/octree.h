@@ -51,7 +51,12 @@ public:
 			for (uint8_t i = 0; i < 8; i++)
 			{
 				if (children[i] != nullptr)
+				{
 					list.push_back(children[i]->coordinate);
+					std::cout << "(" << std::to_string(children[i]->coordinate.x)
+						<< ", " << std::to_string(children[i]->coordinate.y)
+						<< ", " << std::to_string(children[i]->coordinate.z) << ")\n";
+				}
 			}
 		}
 		else
