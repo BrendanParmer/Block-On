@@ -622,32 +622,12 @@ void fillInterior(std::list<glm::ivec3> E0,
 		glm::ivec3 last0 = *itSliceE0;
 		glm::ivec3 last1 = *itSliceE1;
 
-		//NTS: clean up
-		int U0, V0, U1, V1;
-		if (domAxis == 0) //x
-		{
-			U0 = last0.y;
-			V0 = last0.z;
-			U1 = last1.y;
-			V1 = last1.z;
-		}
-		else if (domAxis == 1) //y
-		{
-			U0 = last0.z;
-			V0 = last0.x;
-			U1 = last1.z;
-			V1 = last1.x;
-		}
-		else if (domAxis == 2) //z
-		{
-			U0 = last0.x;
-			V0 = last0.y;
-			U1 = last1.x;
-			V1 = last1.y;
-		}
-		
-		else
-			throw std::invalid_argument("Dominant Axis must be 0, 1, or 2");
+		axis u = (domAxis + 1) % 3;
+		axis v = (domAxis - 1) % 3;
+		int U0 = last0[u];
+		int U1 = last1[u];
+		int V0 = last0[v];
+		int V1 = last1[v];
 
 		while (itSliceE0 != sliceE0.end() && itSliceE1 != sliceE1.end())
 		{
