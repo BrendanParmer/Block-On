@@ -48,6 +48,10 @@ void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis anAxis
 void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list);
 void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root);
 int8_t sign(int num);
+void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w);
+void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w);
+void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w);
+void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w);
 
 void fillInterior(std::list<glm::ivec3> E1, 
 				  std::list<glm::ivec3> E2, 
@@ -270,45 +274,27 @@ void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis domAxi
 */
 void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 {
-	/*
-	* broke version
+	
 	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
 							   P1.y - P0.y,
 							   P1.z - P0.z);
-	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
-							  abs(dP.x * dP.z),
-							  abs(dP.x * dP.y));
-	glm::ivec3 L = M;
-	glm::ivec3 currentP = P0;
-	while (!pointEquals(currentP, P1))
+	for (int i = 0; i < 3; i++)
 	{
-		//find axis with minimum distance to next voxel region face
-		unsigned int min = 0;
-		for (int i = 1; i < 3; i++) //worth it to even have a for loop?
+		if (dP[i] == 0)
 		{
-			if (L[i] > L[min])
-				min = i;
+			ILV_2D(P0, P1, list, i);
+			break;
 		}
-		currentP[min] += dP[min];
-		L -= glm::ivec3(L[min], L[min], L[min]);
-		L[min] = 2 * M[min];
-		std::cout << "Adding " << i3_to_string(currentP) << " to list\n";
-		list.push_back(currentP);
 	}
-	*/
-	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
-							   P1.y - P0.y,
-							   P1.z - P0.z);
 	glm::ivec3 sign_dP = glm::ivec3(sign(dP.x), sign(dP.y), sign(dP.z));
 
 	unsigned int orig_distance = abs(dP.x) + abs(dP.y) + abs(dP.z);
 	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
 							  abs(dP.x * dP.z),
 							  abs(dP.x * dP.y));
-	glm::ivec3 L = M;
+	glm::ivec3 T = M;
 	glm::ivec3 currentP = P0;
-	int i = 0;
-	while (!pointEquals(currentP, P1) && i < 100)
+	while (!pointEquals(currentP, P1))
 	{
 		unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
 		if (distance > orig_distance)
@@ -326,16 +312,15 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 		uint8_t min = 0;
 		for (uint8_t i = 1; i < 3; i++)
 		{
-			if (L[i] < L[min])
+			if (T[i] < T[min])
 				min = i;
 		}
-		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(L[min]) << "\n";
+		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(T[min]) << "\n";
 		currentP[min] += sign_dP[min];
-		L -= glm::ivec3(L[min], L[min], L[min]);
-		L[min] = 2 * M[min];
+		T -= glm::ivec3(T[min], T[min], T[min]);
+		T[min] = 2 * M[min];
 		std::cout << "Adding " << i3_to_string(currentP) << " to list\n";
 		list.push_back(currentP);
-		i++;
 	}
 }
 
@@ -372,14 +357,14 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 	}
 	*/
 	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
-		P1.y - P0.y,
-		P1.z - P0.z);
+							   P1.y - P0.y,
+							   P1.z - P0.z);
 	glm::ivec3 sign_dP = glm::ivec3(sign(dP.x), sign(dP.y), sign(dP.z));
 	unsigned int orig_distance = abs(dP.x) + abs(dP.y) + abs(dP.z);
 	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
 		abs(dP.x * dP.z),
 		abs(dP.x * dP.y));
-	glm::ivec3 L = M;
+	glm::ivec3 T = M;
 	glm::ivec3 currentP = P0;
 	int i = 0;
 	while (!pointEquals(currentP, P1) && i < 100)
@@ -399,19 +384,21 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 		uint8_t min = 0;
 		for (uint8_t i = 1; i < 3; i++)
 		{
-			if (L[i] < L[min])
+			if (T[i] < T[min])
 				min = i;
 		}
-		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(L[min]) << "\n";
+		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(T[min]) << "\n";
 		currentP[min] += sign_dP[min];
-		L -= glm::ivec3(L[min], L[min], L[min]);
-		L[min] = 2 * M[min];
+		T -= glm::ivec3(T[min], T[min], T[min]);
+		T[min] = 2 * M[min];
 		std::cout << "Adding " << i3_to_string(currentP) << " to octree\n";
 		//addVoxelToOctree(currentP, 0, depth, root);
 		i++;
 	}
 }
 
+/*
+*/
 int8_t sign(int num)
 {
 	if (num > 0)
@@ -421,6 +408,107 @@ int8_t sign(int num)
 	else
 		return 0;
 }
+
+void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
+{
+	axis u = (w + 1) % 3;
+	axis v = (w - 1) % 3;
+	if (P0[u] == P1[u])
+		ILV_1D(P0, P1, list, v);
+	else if (P0[v] == P1[v])
+		ILV_1D(P0, P1, list, u);
+	else
+	{
+		glm::ivec2 dP = glm::ivec2(P1[u] - P0[u], P1[v] - P0[v]);
+		glm::ivec2 sign_dP = glm::ivec2(sign(dP[0]), sign(dP[1]));
+
+		glm::ivec2 M = glm::ivec2(abs(dP[1]), abs(dP[0]));
+		glm::ivec2 T = M;
+		glm::ivec2 currentP = glm::ivec2(P0[u], P0[v]);
+		while (currentP[u] != P1[u] && currentP[v] != P1[v])
+		{
+			uint8_t min;
+			if (T[v] > T[u])
+				min = v;
+			else
+				min = u;
+			currentP[min] += sign_dP[min];
+			T -= glm::ivec2(T[min], T[min]);
+			T[min] = 2 * M[min];
+			
+			if (w == 0) //x
+				list.push_back(glm::ivec3(P0.x, currentP[u], currentP[v]));
+			else if (w == 1)
+				list.push_back(glm::ivec3(currentP[v], P0.y, currentP[u]));
+			else if (w == 2)
+				list.push_back(glm::ivec3(currentP[u], currentP[v], P0.z));
+		}
+	}
+}
+
+void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
+{
+	axis u = (w + 1) % 3;
+	axis v = (w - 1) % 3;
+	if (P0[u] == P1[u])
+		ILV_1D(P0, P1, root, v);
+	else if (P0[v] == P1[v])
+		ILV_1D(P0, P1, root, u);
+	else
+	{
+		glm::ivec2 dP = glm::ivec2(P1[u] - P0[u], P1[v] - P0[v]);
+		glm::ivec2 sign_dP = glm::ivec2(sign(dP[0]), sign(dP[1]));
+
+		glm::ivec2 M = glm::ivec2(abs(dP[1]), abs(dP[0]));
+		glm::ivec2 T = M;
+		glm::ivec2 currentP = glm::ivec2(P0[u], P0[v]);
+		while (currentP[u] != P1[u] && currentP[v] != P1[v])
+		{
+			uint8_t min;
+			if (T[v] > T[u])
+				min = v;
+			else
+				min = u;
+			currentP[min] += sign_dP[min];
+			T -= glm::ivec2(T[min], T[min]);
+			T[min] = 2 * M[min];
+
+			if (w == 0) //x
+				addVoxelToOctree(glm::ivec3(P0.x, currentP[u], currentP[v]), 0, depth, root);
+			else if (w == 1) //y
+				addVoxelToOctree(glm::ivec3(currentP[v], P0.y, currentP[u]), 0, depth, root);
+			else if (w == 2) //z
+				addVoxelToOctree(glm::ivec3(currentP[u], currentP[v], P0.z), 0, depth, root);
+		}
+	}
+}
+
+void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
+{
+	if (P0[w] != P1[w])
+	{
+		glm::ivec3 currentP = P0;
+		while (currentP[w] != P1[w])
+		{
+			currentP[w] += sign(P1[w] - P0[w]);
+			list.push_back(currentP);
+		}
+	}
+}
+
+void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
+{
+	if (P0[w] != P1[w])
+	{
+		glm::ivec3 currentP = P0;
+		while (currentP[w] != P1[w])
+		{
+			currentP[w] += sign(P1[w] - P0[w]);
+			addVoxelToOctree(currentP, 0, depth, root);
+		}
+	}
+}
+
 /*
 	function to fill the interior of the triangle
 
