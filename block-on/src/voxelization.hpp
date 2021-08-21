@@ -144,11 +144,11 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		std::list<glm::ivec3> E1;
 		std::list<glm::ivec3> E2;
 
-		std::cout << "\nILV P0-P1...\n";
+		std::cout << "\nILV P0: " << i3_to_string(P0) << " and P1: " << i3_to_string(P1) << "\n";
 		ILV(P0, P1, E0);
-		std::cout << "\nILV P0-P2...\n";
+		std::cout << "\nILV P0: " << i3_to_string(P0) << " and P2: " << i3_to_string(P2) << "\n";
 		ILV(P0, P2, E1);
-		std::cout << "\nIlv P1-P2...\n";
+		std::cout << "\nILV P1: " << i3_to_string(P1) << " and P2: " << i3_to_string(P2) <<"\n";
 		ILV(P1, P2, E2);
 		std::cout << "Edge voxels are calculated\n";
 
@@ -164,7 +164,7 @@ void voxelizeTriangle(float x0, float y0, float z0,
 			addVoxelToOctree(x, 0, depth, *root);
 		}
 		std::cout << "Edge 1 voxels are added to octree\n";
-		//creates hybrid edge
+		//creates hybrid edge of E0 and E2
 		for (const glm::ivec3& x : E2)
 		{
 			std::cout << "Adding point " << i3_to_string(x) << " to octree\n";
@@ -243,7 +243,7 @@ axis dominantAxis(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2)
 	}
 	else
 	{
-		throw std::invalid_argument("Dominant Axis must be 0, 1, or 2");
+		throw std::logic_error("Dominant Axis must be 0, 1, or 2");
 		return 0;
 	}
 }
@@ -279,56 +279,64 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 		P1.y - P0.y,
 		P1.z - P0.z);
 
+	bool isLower = false;
 	//check to see if this is lower than three dimensions
 	for (int i = 0; i < 3; i++)
 	{
 		if (dP[i] == 0)
 		{
+			std::cout << "Dimension " << std::to_string(i) << " is the same\n";
 			ILV_2D(P0, P1, list, i);
+			isLower = true;
 			break;
 		}
 	}
 
-	//which direction to move currentP based on the axis
-	glm::ivec3 sign_dP = glm::ivec3(sign(dP.x), sign(dP.y), sign(dP.z));
-
-	unsigned int orig_distance = abs(dP.x) + abs(dP.y) + abs(dP.z); //testing junk
-
-	//sorta a "slope" factor, see Zhang, et.al (2017) for more details
-	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
-		abs(dP.x * dP.z),
-		abs(dP.x * dP.y));
-	//distance to the next facet, scaled up for integer-only arithmetic
-	//ex: T.x = the distance to the next yz-facet
-	glm::ivec3 T = M;
-	glm::ivec3 currentP = P0;
-	while (!pointEquals(currentP, P1))
+	if (!isLower)
 	{
-		unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
-		if (distance > orig_distance)
+		//which direction to move currentP based on the axis
+		glm::ivec3 sign_dP = glm::ivec3(sign(dP.x), sign(dP.y), sign(dP.z));
+
+		unsigned int orig_distance = abs(dP.x) + abs(dP.y) + abs(dP.z); //testing junk
+
+		//sorta a "slope" factor, see Zhang, et.al (2017) for more details
+		glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
+			abs(dP.x * dP.z),
+			abs(dP.x * dP.y));
+		//distance to the next facet, scaled up for integer-only arithmetic
+		//ex: T.x = the distance to the next yz-facet
+		glm::ivec3 T = M;
+		glm::ivec3 currentP = P0;
+		unsigned int count = 0;
+		while (!pointEquals(currentP, P1) && count < 100)
 		{
-			std::cout << "Error: Expect distance to decrease, but\n"
-				<< "Original distance: " << std::to_string(orig_distance)
-				<< "\nNew distance: " << std::to_string(distance) << "\n";
-			std::cout << "P0: " << i3_to_string(P0)
-				<< "\nP1: " << i3_to_string(P1)
-				<< "\nCurrentP: " << i3_to_string(currentP) << "\n";
-			break;
+			unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
+			if (distance > orig_distance)
+			{
+				std::cout << "Error: Expect distance to decrease, but\n"
+					<< "Original distance: " << std::to_string(orig_distance)
+					<< "\nNew distance: " << std::to_string(distance) << "\n";
+				std::cout << "P0: " << i3_to_string(P0)
+					<< "\nP1: " << i3_to_string(P1)
+					<< "\nCurrentP: " << i3_to_string(currentP) << "\n";
+				std::logic_error("I don't know man");
+			}
+			//find axis with minimum distance to next voxel region face
+			uint8_t min = 0;
+			for (uint8_t i = 1; i < 3; i++)
+			{
+				if (T[i] < T[min])
+					min = i;
+			}
+			std::cout << "Min axis is " << std::to_string(min) << " with T[min] = " << std::to_string(T[min]) << "\n";
+			currentP[min] += sign_dP[min];
+			//Reset T for next iteration
+			T -= glm::ivec3(T[min], T[min], T[min]);
+			T[min] = 2 * M[min];
+			std::cout << "Adding " << i3_to_string(currentP) << " to list\n";
+			list.push_back(currentP);
+			count++;
 		}
-		//find axis with minimum distance to next voxel region face
-		uint8_t min = 0;
-		for (uint8_t i = 1; i < 3; i++)
-		{
-			if (T[i] < T[min])
-				min = i;
-		}
-		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(T[min]) << "\n";
-		currentP[min] += sign_dP[min];
-		//Reset T for next iteration
-		T -= glm::ivec3(T[min], T[min], T[min]);
-		T[min] = 2 * M[min];
-		std::cout << "Adding " << i3_to_string(currentP) << " to octree\n";
-		list.push_back(currentP);
 	}
 }
 
@@ -368,7 +376,8 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 	//ex: T.x = the distance to the next yz-facet
 	glm::ivec3 T = M;
 	glm::ivec3 currentP = P0;
-	while (!pointEquals(currentP, P1))
+	unsigned int count = 0;
+	while (!pointEquals(currentP, P1) && count < 100)
 	{
 		unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
 		if (distance > orig_distance)
@@ -379,7 +388,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 			std::cout << "P0: " << i3_to_string(P0)
 				<< "\nP1: " << i3_to_string(P1)
 				<< "\nCurrentP: " << i3_to_string(currentP) << "\n";
-			break;
+			std::logic_error("Your logic's bad man");
 		}
 		//find axis with minimum distance to next voxel region face
 		uint8_t min = 0;
@@ -388,13 +397,14 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 			if (T[i] < T[min])
 				min = i;
 		}
-		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(T[min]) << "\n";
+		std::cout << "Min axis is " << std::to_string(min) << " with T[min] = " << std::to_string(T[min]) << "\n";
 		currentP[min] += sign_dP[min];
 		//Reset T for next iteration
 		T -= glm::ivec3(T[min], T[min], T[min]);
 		T[min] = 2 * M[min];
 		std::cout << "Adding " << i3_to_string(currentP) << " to octree\n";
 		addVoxelToOctree(currentP, 0, depth, root);
+		count++;
 	}
 }
 
@@ -425,9 +435,15 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 
 	//check if line will be one-dimensional
 	if (P0[u] == P1[u])
+	{
+		std::cout << "Line is one-dimensional\n";
 		ILV_1D(P0, P1, list, v);
+	}
 	else if (P0[v] == P1[v])
+	{
+		std::cout << "Line is one-dimensional\n";
 		ILV_1D(P0, P1, list, u);
+	}
 	else
 	{
 		glm::ivec2 dP = glm::ivec2(P1[u] - P0[u], P1[v] - P0[v]);
@@ -436,7 +452,8 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 		glm::ivec2 M = glm::ivec2(abs(dP[1]), abs(dP[0]));
 		glm::ivec2 T = M;
 		glm::ivec2 currentP = glm::ivec2(P0[u], P0[v]);
-		while (currentP[u] != P1[u] && currentP[v] != P1[v])
+		unsigned int count = 0; //debugging stuff
+		while (currentP[u] != P1[u] && currentP[v] != P1[v] && count < 100)
 		{
 			uint8_t min;
 			if (T[v] > T[u])
@@ -447,12 +464,16 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 			T -= glm::ivec2(T[min], T[min]);
 			T[min] = 2 * M[min];
 			
+			glm::ivec3 newPoint;
 			if (w == 0) //x
-				list.push_back(glm::ivec3(P0.x, currentP[u], currentP[v]));
+				newPoint = glm::ivec3(P0.x, currentP[u], currentP[v]);
 			else if (w == 1) //y
-				list.push_back(glm::ivec3(currentP[v], P0.y, currentP[u]));
+				newPoint = glm::ivec3(currentP[v], P0.y, currentP[u]);
 			else if (w == 2) //z
-				list.push_back(glm::ivec3(currentP[u], currentP[v], P0.z));
+				newPoint = glm::ivec3(currentP[u], currentP[v], P0.z);
+			std::cout << "Adding " << i3_to_string(newPoint) << " to list\n";
+			list.push_back(newPoint);
+			count++;
 		}
 	}
 }
@@ -471,9 +492,15 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 
 	//check if line will be one-dimensional
 	if (P0[u] == P1[u])
+	{
+		std::cout << "Line is one-dimensional\n";
 		ILV_1D(P0, P1, root, v);
+	}
 	else if (P0[v] == P1[v])
+	{
+		std::cout << "Line is one-dimensional\n";
 		ILV_1D(P0, P1, root, u);
+	}
 	else
 	{
 		glm::ivec2 dP = glm::ivec2(P1[u] - P0[u], P1[v] - P0[v]);
@@ -482,7 +509,8 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 		glm::ivec2 M = glm::ivec2(abs(dP[1]), abs(dP[0]));
 		glm::ivec2 T = M;
 		glm::ivec2 currentP = glm::ivec2(P0[u], P0[v]);
-		while (currentP[u] != P1[u] && currentP[v] != P1[v])
+		unsigned int count = 0;
+		while (currentP[u] != P1[u] && currentP[v] != P1[v] && count < 100)
 		{
 			uint8_t min;
 			if (T[v] > T[u])
@@ -493,12 +521,16 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 			T -= glm::ivec2(T[min], T[min]);
 			T[min] = 2 * M[min];
 
+			glm::ivec3 newPoint;
 			if (w == 0) //x
-				addVoxelToOctree(glm::ivec3(P0.x, currentP[u], currentP[v]), 0, depth, root);
+				newPoint = glm::ivec3(P0.x, currentP[u], currentP[v]);
 			else if (w == 1) //y
-				addVoxelToOctree(glm::ivec3(currentP[v], P0.y, currentP[u]), 0, depth, root);
+				newPoint = glm::ivec3(currentP[v], P0.y, currentP[u]);
 			else if (w == 2) //z
-				addVoxelToOctree(glm::ivec3(currentP[u], currentP[v], P0.z), 0, depth, root);
+				newPoint = glm::ivec3(currentP[u], currentP[v], P0.z);
+			std::cout << "Adding " << i3_to_string(newPoint) << " to octree\n";
+			addVoxelToOctree(newPoint, 0, depth, root);
+			count++;
 		}
 	}
 }
@@ -517,6 +549,7 @@ void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 		while (currentP[w] != P1[w])
 		{
 			currentP[w] += sign(P1[w] - P0[w]);
+			std::cout << "Adding " << i3_to_string(currentP) << " to list\n";
 			list.push_back(currentP);
 		}
 	}
@@ -536,6 +569,7 @@ void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 		while (currentP[w] != P1[w])
 		{
 			currentP[w] += sign(P1[w] - P0[w]);
+			std::cout << "Adding " << i3_to_string(currentP) << " to octree\n";
 			addVoxelToOctree(currentP, 0, depth, root);
 		}
 	}
@@ -588,6 +622,7 @@ void fillInterior(std::list<glm::ivec3> E0,
 		glm::ivec3 last0 = *itSliceE0;
 		glm::ivec3 last1 = *itSliceE1;
 
+		//NTS: clean up
 		int U0, V0, U1, V1;
 		if (domAxis == 0) //x
 		{
@@ -610,6 +645,7 @@ void fillInterior(std::list<glm::ivec3> E0,
 			U1 = last1.x;
 			V1 = last1.y;
 		}
+		
 		else
 			throw std::invalid_argument("Dominant Axis must be 0, 1, or 2");
 
@@ -765,7 +801,7 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 	//std::cout << "Setting up initial variable a...\n";
 	uint8_t a = 0;
 
-	std::cout << "Level is: " << std::to_string(level) << " out of " << std::to_string(depth) << "\n";
+	//std::cout << "Level is: " << std::to_string(level) << " out of " << std::to_string(depth) << "\n";
 	if (level < depth)
 	{
 		//determines relative octant and sets a new point
@@ -804,18 +840,18 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 		else
 			newPoint.z -= half;
 
-		std::cout << std::to_string(a) << '\n';
-		std::cout << i3_to_string(main.coordinate) << '\n';
+		//std::cout << std::to_string(a) << '\n';
+		//std::cout << i3_to_string(main.coordinate) << '\n';
 		//assign child
-		std::cout << "Assigning child...\n";
+		//std::cout << "Assigning child...\n";
 		if (main.children[a] == nullptr)
 		{
-			std::cout << "Creating new Octnode for child...\n";
+			//std::cout << "Creating new Octnode for child...\n";
 			main.children[a] = new Octnode(newPoint, &main);
-			std::cout << i3_to_string(main.children[a]->coordinate) << "\n";
-			std::cout << "Creation successful\n";
+			//std::cout << i3_to_string(main.children[a]->coordinate) << "\n";
+			//std::cout << "Creation successful\n";
 		}
-		std::cout << "Onto the next layer in the tree\n";
+		//std::cout << "Onto the next layer in the tree\n";
 		addVoxelToOctree(P, level + 1, depth, *main.children[a]);
 	}
 }
