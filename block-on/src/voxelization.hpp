@@ -643,28 +643,10 @@ void fillInterior(std::list<glm::ivec3> E0,
 				last0 = *itSliceE0;
 				last1 = *itSliceE1;
 
-				//probably should condense into a function
-				if (domAxis == 0) //x
-				{
-					U0 = last0.y;
-					V0 = last0.z;
-					U1 = last1.y;
-					V1 = last1.z;
-				}
-				else if (domAxis == 1) //y
-				{
-					U0 = last0.z;
-					V0 = last0.x;
-					U1 = last1.z;
-					V1 = last1.x;
-				}
-				else if (domAxis == 2) //z
-				{
-					U0 = last0.x;
-					V0 = last0.y;
-					U1 = last1.x;
-					V1 = last1.y;
-				}
+				int U0 = last0[u];
+				int U1 = last1[u];
+				int V0 = last0[v];
+				int V1 = last1[v];
 			}
 
 		}
