@@ -274,10 +274,12 @@ void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis domAxi
 */
 void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 {
-	
+	//difference between voxels
 	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
-							   P1.y - P0.y,
-							   P1.z - P0.z);
+		P1.y - P0.y,
+		P1.z - P0.z);
+
+	//check to see if this is lower than three dimensions
 	for (int i = 0; i < 3; i++)
 	{
 		if (dP[i] == 0)
@@ -286,88 +288,21 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 			break;
 		}
 	}
+
+	//which direction to move currentP based on the axis
 	glm::ivec3 sign_dP = glm::ivec3(sign(dP.x), sign(dP.y), sign(dP.z));
 
-	unsigned int orig_distance = abs(dP.x) + abs(dP.y) + abs(dP.z);
-	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
-							  abs(dP.x * dP.z),
-							  abs(dP.x * dP.y));
-	glm::ivec3 T = M;
-	glm::ivec3 currentP = P0;
-	while (!pointEquals(currentP, P1))
-	{
-		unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
-		if (distance > orig_distance)
-		{
-			std::cout << "Error: Expect distance to decrease, but\n"
-				<< "Original distance: " << std::to_string(orig_distance)
-				<< "\nNew distance: " << std::to_string(distance) << "\n";
-			std::cout << "P0: " << i3_to_string(P0)
-				<< "\nP1: " << i3_to_string(P1)
-				<< "\nCurrentP: " << i3_to_string(currentP)
-				<< "\ndP: " << i3_to_string(dP) << "\n";
-			break;
-		}
-		//find axis with minimum distance to next voxel region face
-		uint8_t min = 0;
-		for (uint8_t i = 1; i < 3; i++)
-		{
-			if (T[i] < T[min])
-				min = i;
-		}
-		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(T[min]) << "\n";
-		currentP[min] += sign_dP[min];
-		T -= glm::ivec3(T[min], T[min], T[min]);
-		T[min] = 2 * M[min];
-		std::cout << "Adding " << i3_to_string(currentP) << " to list\n";
-		list.push_back(currentP);
-	}
-}
+	unsigned int orig_distance = abs(dP.x) + abs(dP.y) + abs(dP.z); //testing junk
 
-/*
-	version of ILV function that adds points directly to an octree rather than a list
-
-	glm::ivec3 P0, P1 - voxelized endpoints of the line
-	Octnode root - root of the main octree
-*/
-void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
-{
-	/*glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
-		P1.y - P0.y,
-		P1.z - P0.z);
+	//sorta a "slope" factor, see Zhang, et.al (2017) for more details
 	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
 		abs(dP.x * dP.z),
 		abs(dP.x * dP.y));
-	glm::ivec3 L = M;
-	glm::ivec3 currentP = P0;
-	while (!pointEquals(currentP, P1))
-	{
-		//find axis with minimum distance to next voxel region face
-		unsigned int min = 0;
-		for (int i = 1; i < 3; i++) //worth it to even have a for loop?
-		{
-			if (L[i] > L[min])
-				min = i;
-		}
-		currentP[min] += dP[min];
-		L -= glm::ivec3(L[min], L[min], L[min]);
-		L[min] = 2 * M[min];
-		std::cout << "Adding point " << i3_to_string(currentP) << " to octree\n";
-		addVoxelToOctree(currentP, 0, depth, root);
-	}
-	*/
-	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
-							   P1.y - P0.y,
-							   P1.z - P0.z);
-	glm::ivec3 sign_dP = glm::ivec3(sign(dP.x), sign(dP.y), sign(dP.z));
-	unsigned int orig_distance = abs(dP.x) + abs(dP.y) + abs(dP.z);
-	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
-		abs(dP.x * dP.z),
-		abs(dP.x * dP.y));
+	//distance to the next facet, scaled up for integer-only arithmetic
+	//ex: T.x = the distance to the next yz-facet
 	glm::ivec3 T = M;
 	glm::ivec3 currentP = P0;
-	int i = 0;
-	while (!pointEquals(currentP, P1) && i < 100)
+	while (!pointEquals(currentP, P1))
 	{
 		unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
 		if (distance > orig_distance)
@@ -389,15 +324,82 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 		}
 		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(T[min]) << "\n";
 		currentP[min] += sign_dP[min];
+		//Reset T for next iteration
 		T -= glm::ivec3(T[min], T[min], T[min]);
 		T[min] = 2 * M[min];
 		std::cout << "Adding " << i3_to_string(currentP) << " to octree\n";
-		//addVoxelToOctree(currentP, 0, depth, root);
-		i++;
+		list.push_back(currentP);
 	}
 }
 
 /*
+	version of ILV function that adds points directly to an octree rather than a list
+
+	glm::ivec3 P0, P1 - voxelized endpoints of the line
+	Octnode root - root of the main octree
+*/
+void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
+{
+	//difference between voxels
+	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
+							   P1.y - P0.y,
+							   P1.z - P0.z);
+
+	//check to see if this is lower than three dimensions
+	for (int i = 0; i < 3; i++)
+	{
+		if (dP[i] == 0)
+		{
+			ILV_2D(P0, P1, root, i);
+			break;
+		}
+	}
+
+	//which direction to move currentP based on the axis
+	glm::ivec3 sign_dP = glm::ivec3(sign(dP.x), sign(dP.y), sign(dP.z)); 
+
+	unsigned int orig_distance = abs(dP.x) + abs(dP.y) + abs(dP.z); //testing junk
+
+	//sorta a "slope" factor, see Zhang, et.al (2017) for more details
+	glm::ivec3 M = glm::ivec3(abs(dP.y * dP.z),
+		abs(dP.x * dP.z),
+		abs(dP.x * dP.y));
+	//distance to the next facet, scaled up for integer-only arithmetic
+	//ex: T.x = the distance to the next yz-facet
+	glm::ivec3 T = M;
+	glm::ivec3 currentP = P0;
+	while (!pointEquals(currentP, P1))
+	{
+		unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
+		if (distance > orig_distance)
+		{
+			std::cout << "Error: Expect distance to decrease, but\n"
+				<< "Original distance: " << std::to_string(orig_distance)
+				<< "\nNew distance: " << std::to_string(distance) << "\n";
+			std::cout << "P0: " << i3_to_string(P0)
+				<< "\nP1: " << i3_to_string(P1)
+				<< "\nCurrentP: " << i3_to_string(currentP) << "\n";
+			break;
+		}
+		//find axis with minimum distance to next voxel region face
+		uint8_t min = 0;
+		for (uint8_t i = 1; i < 3; i++)
+		{
+			if (T[i] < T[min])
+				min = i;
+		}
+		std::cout << "Min axis is " << std::to_string(min) << " with L[min] = " << std::to_string(T[min]) << "\n";
+		currentP[min] += sign_dP[min];
+		//Reset T for next iteration
+		T -= glm::ivec3(T[min], T[min], T[min]);
+		T[min] = 2 * M[min];
+		std::cout << "Adding " << i3_to_string(currentP) << " to octree\n";
+		addVoxelToOctree(currentP, 0, depth, root);
+	}
+}
+
+/**
+* Returns the sign function of an integer
 */
 int8_t sign(int num)
 {
@@ -409,10 +411,19 @@ int8_t sign(int num)
 		return 0;
 }
 
+/**
+* 2D case of ILV algorithm
+* glm::ivec3 P0, P1 - the endpoints of the line
+* std::list<glm::ivec3> list - the list we are temporarily storing the voxels in
+* axis w - the axis where P0 and P1 are aligned
+*/
 void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 {
+	//the other two axes
 	axis u = (w + 1) % 3;
 	axis v = (w - 1) % 3;
+
+	//check if line will be one-dimensional
 	if (P0[u] == P1[u])
 		ILV_1D(P0, P1, list, v);
 	else if (P0[v] == P1[v])
@@ -438,18 +449,27 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 			
 			if (w == 0) //x
 				list.push_back(glm::ivec3(P0.x, currentP[u], currentP[v]));
-			else if (w == 1)
+			else if (w == 1) //y
 				list.push_back(glm::ivec3(currentP[v], P0.y, currentP[u]));
-			else if (w == 2)
+			else if (w == 2) //z
 				list.push_back(glm::ivec3(currentP[u], currentP[v], P0.z));
 		}
 	}
 }
 
+/**
+* 2D case of ILV algorithm
+* glm::ivec3 P0, P1 - the endpoints of the line
+* Octnode root - the root of the octree we are storing the voxels in
+* axis w - the axis where P0 and P1 are aligned
+*/
 void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 {
+	//the other two axes
 	axis u = (w + 1) % 3;
 	axis v = (w - 1) % 3;
+
+	//check if line will be one-dimensional
 	if (P0[u] == P1[u])
 		ILV_1D(P0, P1, root, v);
 	else if (P0[v] == P1[v])
@@ -483,9 +503,15 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 	}
 }
 
+/**
+* 1D case of ILV algorithm
+* glm::ivec3 P0, P1 - the endpoints of the line
+* std::list<glm::ivec3> list - the list we are temporarily storing the voxels in
+* axis w - the axis where P0 and P1 aren't aligned
+*/
 void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 {
-	if (P0[w] != P1[w])
+	if (P0[w] != P1[w]) //if the endpoints are the same, then it's already in the octree
 	{
 		glm::ivec3 currentP = P0;
 		while (currentP[w] != P1[w])
@@ -496,9 +522,15 @@ void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 	}
 }
 
+/**
+* 1D case of ILV algorithm
+* glm::ivec3 P0, P1 - the endpoints of the line
+* Octnode root - the root of the octree we're storing our new voxels in
+* axis w - the axis where P0 and P1 aren't aligned
+*/
 void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 {
-	if (P0[w] != P1[w])
+	if (P0[w] != P1[w]) //if the endpoints are the same, then it's already in the octree
 	{
 		glm::ivec3 currentP = P0;
 		while (currentP[w] != P1[w])
