@@ -686,12 +686,36 @@ std::forward_list<glm::ivec3> getSubSequence(std::forward_list<glm::ivec3>::iter
 	int i = 0; // strange bug where some triangles (randomly) appear to infinitely
 			   // add voxels to a list, so this is just preventing that while
 			   // I need to fix it
-			   
-	while ((*it)[w] == compare && i < 1000)
+	std::cout << "Entering while loop\n";
+	if (w == 0)
 	{
-		subsequence.push_front(*it);
-		it++;
-		i++;
+		while (it->x == compare && i < 1000)
+		{
+			std::cout << "Adding " << i3_to_string(*it) << " to subsequence\n";
+			subsequence.push_front(*it);
+			it++;
+			i++;
+		}
+	}
+	else if (w == 1)
+	{
+		while (it->y == compare && i < 1000)
+		{
+			std::cout << "Adding " << i3_to_string(*it) << " to subsequence\n";
+			subsequence.push_front(*it);
+			it++;
+			i++;
+		}
+	}
+	else if (w == 2)
+	{
+		while (it->z == compare && i < 1000)
+		{
+			std::cout << "Adding " << i3_to_string(*it) << " to subsequence\n";
+			subsequence.push_front(*it);
+			it++;
+			i++;
+		}
 	}
 	return subsequence;
 }
