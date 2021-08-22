@@ -37,14 +37,76 @@ namespace Test
 			axis expected = 0;
 			assert(dominantAxis(P0, P1, P2) == 0);
 		}
-		TEST_METHOD(ilv)
+		TEST_METHOD(ilv_1d_list)
 		{
+			//1D
 			glm::ivec3 P0 = glm::ivec3(0, 0, 0);
 			glm::ivec3 P1 = glm::ivec3(0, 0, 5);
 			std::list<glm::ivec3> list;
-			std::list<glm::ivec3> expected = { P0, glm::ivec3(0, 0, 1), glm::ivec3(0,0,2), glm::ivec3(0,0,3), glm::ivec3(0,0,4), P1 };
+			std::list<glm::ivec3> expected = { 
+				P0, 
+				glm::ivec3(0, 0, 1), 
+				glm::ivec3(0, 0, 2), 
+				glm::ivec3(0, 0, 3), 
+				glm::ivec3(0, 0, 4), 
+				P1 };
 			ILV(P0, P1, list);
 			
+			assert(list.size() == expected.size());
+			auto it1 = list.begin();
+			auto it2 = expected.begin();
+			while (it1 != list.end() && it2 != expected.end())
+			{
+				assert(pointEquals(*it1, *it2));
+				it1++;
+				it2++;
+			}
+		}
+		TEST_METHOD(ilv_2d_list)
+		{
+			glm::ivec3 P0 = glm::ivec3(0, 0, 0);
+			glm::ivec3 P1 = glm::ivec3(0, 2, 2);
+			std::list<glm::ivec3> list;
+			std::list<glm::ivec3> expected = {
+				P0,
+				glm::ivec3(0, 1, 0),
+				glm::ivec3(0, 1, 1),
+				glm::ivec3(0, 2, 1),
+				P1 };
+			ILV(P0, P1, list);
+			assert(list.size() == expected.size());
+			auto it1 = list.begin();
+			auto it2 = expected.begin();
+			while (it1 != list.end() && it2 != expected.end())
+			{
+				assert(pointEquals(*it1, *it2));
+				it1++;
+				it2++;
+			}
+		}
+		TEST_METHOD(ilv_3d_list)
+		{
+			glm::ivec3 P0 = glm::ivec3(0, 0, 0);
+			glm::ivec3 P1 = glm::ivec3(2, 2, 2);
+			std::list<glm::ivec3> list;
+			std::list<glm::ivec3> expected = {
+				P0,
+				glm::ivec3(1, 0, 0),
+				glm::ivec3(1, 1, 0),
+				glm::ivec3(1, 1, 1),
+				glm::ivec3(2, 1, 1),
+				glm::ivec3(2, 2, 1),
+				P1 };
+			ILV(P0, P1, list);
+			assert(list.size() == expected.size());
+			auto it1 = list.begin();
+			auto it2 = expected.begin();
+			while (it1 != list.end() && it2 != expected.end())
+			{
+				assert(pointEquals(*it1, *it2));
+				it1++;
+				it2++;
+			}
 		}
 	};
 }

@@ -757,6 +757,7 @@ bool lineCondition(glm::ivec3 point, axis w, int dU, int dV, int U, int V)
 	return (m - n <= compare && compare <= m + n);
 }
 
+//probably should put in octree class
 /*
 	adds a voxel to an octree
 
