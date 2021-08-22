@@ -17,17 +17,19 @@ namespace Test
 		{
 			glm::ivec3 expected = glm::ivec3(1, 0, 2);
 			glm::ivec3 actual = voxelizePoint(glm::ivec3(1.2, -0.4, 1.1249));
-			assert(pointEquals(expected, actual));
+			
+			Assert::AreEqual(true, pointEquals(expected, actual));
 
-			assert(pointEquals(expected, voxelizePoint(1.2, -0.4, 1.1249)));
+			Assert::AreEqual(true, pointEquals(expected, voxelizePoint(1.2, -0.4, 1.1249)));
 		}
 		TEST_METHOD(point_equals)
 		{
+			bool test = true;
 			glm::ivec3 P0 = glm::ivec3(1, 0, 2);
 			glm::ivec3 P1 = glm::ivec3(1, 0, 2);
-			assert(pointEquals(P0, P1));
+			Assert::AreEqual(true, pointEquals(P0, P1));
 			P1.x -= 1214;
-			assert(!pointEquals(P0, P1));
+			Assert::AreEqual(false, pointEquals(P0, P1));
 		}
 		TEST_METHOD(dom_axis)
 		{
@@ -35,7 +37,7 @@ namespace Test
 			glm::ivec3 P1 = glm::ivec3(0, 0, 1);
 			glm::ivec3 P2 = glm::ivec3(0, 1, 0);
 			axis expected = 0;
-			assert(dominantAxis(P0, P1, P2) == 0);
+			Assert::AreEqual(expected, dominantAxis(P0, P1, P2));
 		}
 		TEST_METHOD(ilv_1d_list)
 		{
@@ -52,12 +54,12 @@ namespace Test
 				P1 };
 			ILV(P0, P1, list);
 			
-			assert(list.size() == expected.size());
+			Assert::AreEqual(expected.size(), list.size());
 			auto it1 = list.begin();
 			auto it2 = expected.begin();
 			while (it1 != list.end() && it2 != expected.end())
 			{
-				assert(pointEquals(*it1, *it2));
+				Assert::AreEqual(pointEquals(*it2, *it1), true);
 				it1++;
 				it2++;
 			}
@@ -74,12 +76,12 @@ namespace Test
 				glm::ivec3(0, 2, 1),
 				P1 };
 			ILV(P0, P1, list);
-			assert(list.size() == expected.size());
+			Assert::AreEqual(expected.size(), list.size());
 			auto it1 = list.begin();
 			auto it2 = expected.begin();
 			while (it1 != list.end() && it2 != expected.end())
 			{
-				assert(pointEquals(*it1, *it2));
+				Assert::AreEqual(pointEquals(*it2, *it1), true);
 				it1++;
 				it2++;
 			}
@@ -98,12 +100,12 @@ namespace Test
 				glm::ivec3(2, 2, 1),
 				P1 };
 			ILV(P0, P1, list);
-			assert(list.size() == expected.size());
+			Assert::AreEqual(expected.size(), list.size());
 			auto it1 = list.begin();
 			auto it2 = expected.begin();
 			while (it1 != list.end() && it2 != expected.end())
 			{
-				assert(pointEquals(*it1, *it2));
+				Assert::AreEqual(pointEquals(*it2, *it1), true);
 				it1++;
 				it2++;
 			}
