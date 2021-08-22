@@ -229,13 +229,13 @@ axis dominantAxis(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2)
 	glm::ivec3 E0 = P0 - P1;
 	glm::ivec3 E1 = P0 - P2;
 
-	int x = E0.y * E1.z - E0.z * E1.y;
+	//pseudo cross-product stuff
+	int x = abs(E0.y * E1.z - E0.z * E1.y);
 	int max = x;
-	int y = E0.z * E1.x - E0.x * E1.z;
+	int y = abs(E0.z * E1.x - E0.x * E1.z);
 	if (max < y)
 		max = y;
-	int z = E0.x * E1.y - E0.y * E1.x;
-
+	int z = abs(E0.x * E1.y - E0.y * E1.x);
 	if (max < z)
 		max = z;
 
