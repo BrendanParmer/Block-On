@@ -25,9 +25,10 @@ TODO
 
 #include <stdexcept>
 #include <list>
+#include <iostream>
 
 #include "octree.h"
-#include "math.h"
+#include "util.h"
 
 typedef uint8_t axis; //x=0, y=1, z=2
 
@@ -63,7 +64,7 @@ bool lineCondition(glm::ivec3 point, axis w, int dU, int dV, int U, int V);
 
 void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode root);
 
-int smallIntPow(int x, uint8_t p); //from math.h
+int smallIntPow(int x, uint8_t p); //from util.h
 
 std::list<glm::ivec3> end();
 std::string i3_to_string(glm::ivec3 P);
@@ -144,32 +145,38 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		std::list<glm::ivec3> E1;
 		std::list<glm::ivec3> E2;
 
+		//Calculate edge voxels
 		std::cout << "\nILV P0: " << i3_to_string(P0) << " and P1: " << i3_to_string(P1) << "\n";
 		ILV(P0, P1, E0);
 		std::cout << "\nILV P0: " << i3_to_string(P0) << " and P2: " << i3_to_string(P2) << "\n";
 		ILV(P0, P2, E1);
 		std::cout << "\nILV P1: " << i3_to_string(P1) << " and P2: " << i3_to_string(P2) <<"\n";
 		ILV(P1, P2, E2);
-		std::cout << "Edge voxels are calculated\n";
+		std::cout << "Edge voxels are calculated\n\n";
+		
+		//Add edge voxels to octree
+		std::cout << "E0.size() = " << std::to_string(E0.size()) << "\n";
+		std::cout << "E1.size() = " << std::to_string(E1.size()) << "\n";
+		std::cout << "E2.size() = " << std::to_string(E2.size()) << "\n";
 
-		for (const glm::ivec3& x : E0) //these aren't running
+		for (std::list<glm::ivec3>::iterator E0it = E0.begin(); E0it != E0.end(); ++E0it)
 		{
-			std::cout << "Adding point " << i3_to_string(x) << " to octree\n";
-			addVoxelToOctree(x, 0, depth, *root);
+			std::cout << "Adding point " << i3_to_string(*E0it) << " to octree\n";
+			addVoxelToOctree(*E0it, 0, depth, *root);
 		}
 		std::cout << "Edge 0 voxels are added to octree\n";
-		for (const glm::ivec3& x : E1)
+		for (std::list<glm::ivec3>::iterator E1it = E1.begin(); E1it != E1.end(); ++E1it)
 		{
-			std::cout << "Adding point " << i3_to_string(x) << " to octree\n";
-			addVoxelToOctree(x, 0, depth, *root);
+			std::cout << "Adding point " << i3_to_string(*E1it) << " to octree\n";
+			addVoxelToOctree(*E1it, 0, depth, *root);
 		}
 		std::cout << "Edge 1 voxels are added to octree\n";
 		//creates hybrid edge of E0 and E2
-		for (const glm::ivec3& x : E2)
+		for (std::list<glm::ivec3>::iterator E2it = E2.begin(); E2it != E2.end(); ++E2it)
 		{
-			std::cout << "Adding point " << i3_to_string(x) << " to octree\n";
-			addVoxelToOctree(x, 0, depth, *root);
-			E0.push_back(x);
+			std::cout << "Adding point " << i3_to_string(*E2it) << " to octree\n";
+			addVoxelToOctree(*E2it, 0, depth, *root);
+			E0.push_back(*E2it);
 		}
 		std::cout << "Edge 2 voxels are added to octree\n\n";
 		fillInterior(E0, E1, P0, P2, domAxis);
@@ -471,6 +478,8 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 				newPoint = glm::ivec3(currentP[v], P0.y, currentP[u]);
 			else if (w == 2) //z
 				newPoint = glm::ivec3(currentP[u], currentP[v], P0.z);
+			else
+				throw std::logic_error("Ope your axis was out of bounds");
 			std::cout << "Adding " << i3_to_string(newPoint) << " to list\n";
 			list.push_back(newPoint);
 			count++;
@@ -543,16 +552,20 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 */
 void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 {
-	if (P0[w] != P1[w]) //if the endpoints are the same, then it's already in the octree
+	if (!pointEquals(P0, P1)) //if the endpoints are the same, then it's already in the octree
 	{
+		std::cout << "Points are distinct\n";
 		glm::ivec3 currentP = P0;
 		while (currentP[w] != P1[w])
 		{
+			std::cout << "currentP is " << i3_to_string(currentP) << "\n";
 			currentP[w] += sign(P1[w] - P0[w]);
 			std::cout << "Adding " << i3_to_string(currentP) << " to list\n";
 			list.push_back(currentP);
 		}
 	}
+	else
+		std::cout << "Points " << i3_to_string(P0) << " and " << i3_to_string(P1) << " are the same\n";
 }
 
 /**
@@ -563,11 +576,12 @@ void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 */
 void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 {
-	if (P0[w] != P1[w]) //if the endpoints are the same, then it's already in the octree
+	if (!pointEquals(P0, P1)) //if the endpoints are the same, then it's already in the octree
 	{
 		glm::ivec3 currentP = P0;
 		while (currentP[w] != P1[w])
 		{
+			std::cout << "currentP is " << i3_to_string(currentP) << "\n";
 			currentP[w] += sign(P1[w] - P0[w]);
 			std::cout << "Adding " << i3_to_string(currentP) << " to octree\n";
 			addVoxelToOctree(currentP, 0, depth, root);

@@ -6,7 +6,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\math.h">
+    <ClInclude Include="src\util.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\octree.h">

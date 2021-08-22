@@ -4,6 +4,7 @@
 #include "../glm-master/glm/glm.hpp"
 #include "../glm-master/glm/gtc/type_ptr.hpp"
 #include "voxelization.hpp"
+#include <iostream>
 
 std::string i3_to_string(glm::ivec3 P); //from voxelization.hpp
 
