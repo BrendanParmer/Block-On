@@ -26,6 +26,7 @@ TODO
 #include <stdexcept>
 #include <list>
 #include <iostream>
+#include <forward_list>
 
 #include "octree.h"
 #include "util.h"
@@ -46,27 +47,27 @@ bool pointEquals(glm::ivec3 P0, glm::ivec3 P1);
 axis dominantAxis(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2);
 void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis anAxis);
 
-void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list);
+void ILV(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list);
 void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root);
 int8_t sign(int num);
-void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w);
+void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list, axis w);
 void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w);
-void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w);
+void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list, axis w);
 void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w);
 
-void fillInterior(std::list<glm::ivec3> E1, 
-				  std::list<glm::ivec3> E2, 
+void fillInterior(std::forward_list<glm::ivec3> E1, 
+				  std::forward_list<glm::ivec3> E2, 
 				  glm::ivec3 P0, 
 				  glm::ivec3 P2, 
 				  axis domAxis);
-std::list<glm::ivec3> getSubSequence(std::list<glm::ivec3>::iterator it, axis w, int compare);
+std::forward_list<glm::ivec3> getSubSequence(std::forward_list<glm::ivec3>::iterator it, axis w, int compare);
 bool lineCondition(glm::ivec3 point, axis w, int dU, int dV, int U, int V);
 
 void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode root);
 
 int smallIntPow(int x, uint8_t p); //from util.h
 
-std::list<glm::ivec3> end();
+std::forward_list<glm::ivec3> end();
 std::string i3_to_string(glm::ivec3 P);
 
 
@@ -141,9 +142,9 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		std::cout << "Points are sorted\n\n";
 
 		//establishes edge voxels in a linked list
-		std::list<glm::ivec3> E0;
-		std::list<glm::ivec3> E1;
-		std::list<glm::ivec3> E2;
+		std::forward_list<glm::ivec3> E0;
+		std::forward_list<glm::ivec3> E1;
+		std::forward_list<glm::ivec3> E2;
 
 		//Calculate edge voxels
 		std::cout << "\nILV P0: " << i3_to_string(P0) << " and P1: " << i3_to_string(P1) << "\n";
@@ -155,28 +156,29 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		std::cout << "Edge voxels are calculated\n\n";
 		
 		//Add edge voxels to octree
-		std::cout << "E0.size() = " << std::to_string(E0.size()) << "\n";
+		//was printing size but we don't need a doubly linked list
+		/*std::cout << "E0.size() = " << std::to_string(E0.size()) << "\n";
 		std::cout << "E1.size() = " << std::to_string(E1.size()) << "\n";
-		std::cout << "E2.size() = " << std::to_string(E2.size()) << "\n";
+		std::cout << "E2.size() = " << std::to_string(E2.size()) << "\n";*/
 
-		for (std::list<glm::ivec3>::iterator E0it = E0.begin(); E0it != E0.end(); ++E0it)
+		for (auto E0it = E0.begin(); E0it != E0.end(); ++E0it)
 		{
 			std::cout << "Adding point " << i3_to_string(*E0it) << " to octree\n";
 			addVoxelToOctree(*E0it, 0, depth, *root);
 		}
 		std::cout << "Edge 0 voxels are added to octree\n";
-		for (std::list<glm::ivec3>::iterator E1it = E1.begin(); E1it != E1.end(); ++E1it)
+		for (auto E1it = E1.begin(); E1it != E1.end(); ++E1it)
 		{
 			std::cout << "Adding point " << i3_to_string(*E1it) << " to octree\n";
 			addVoxelToOctree(*E1it, 0, depth, *root);
 		}
 		std::cout << "Edge 1 voxels are added to octree\n";
 		//creates hybrid edge of E0 and E2
-		for (std::list<glm::ivec3>::iterator E2it = E2.begin(); E2it != E2.end(); ++E2it)
+		for (auto E2it = E2.begin(); E2it != E2.end(); ++E2it)
 		{
 			std::cout << "Adding point " << i3_to_string(*E2it) << " to octree\n";
 			addVoxelToOctree(*E2it, 0, depth, *root);
-			E0.push_back(*E2it);
+			E0.push_front(*E2it);
 		}
 		std::cout << "Edge 2 voxels are added to octree\n\n";
 		fillInterior(E0, E1, P0, P2, domAxis);
@@ -279,7 +281,7 @@ void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis domAxi
 * glm::ivec3 P0, P1, P2 - the voxelized triangle vertices
 * std::list<glm::ivec3> list - the list that new voxels will be added to
 */
-void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
+void ILV(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list)
 {
 	//difference between voxels
 	glm::ivec3 dP = glm::ivec3(P1.x - P0.x,
@@ -341,7 +343,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list)
 			T -= glm::ivec3(T[min], T[min], T[min]);
 			T[min] = 2 * M[min];
 			std::cout << "Adding " << i3_to_string(currentP) << " to list\n";
-			list.push_back(currentP);
+			list.push_front(currentP);
 			count++;
 		}
 	}
@@ -434,7 +436,7 @@ int8_t sign(int num)
 * std::list<glm::ivec3> list - the list we are temporarily storing the voxels in
 * axis w - the axis where P0 and P1 are aligned
 */
-void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
+void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list, axis w)
 {
 	//the other two axes
 	axis u = (w + 1) % 3;
@@ -481,7 +483,7 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 			else
 				throw std::logic_error("Ope your axis was out of bounds");
 			std::cout << "Adding " << i3_to_string(newPoint) << " to list\n";
-			list.push_back(newPoint);
+			list.push_front(newPoint);
 			count++;
 		}
 	}
@@ -550,7 +552,7 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 * std::list<glm::ivec3> list - the list we are temporarily storing the voxels in
 * axis w - the axis where P0 and P1 aren't aligned
 */
-void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
+void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list, axis w)
 {
 	if (!pointEquals(P0, P1)) //if the endpoints are the same, then it's already in the octree
 	{
@@ -561,7 +563,7 @@ void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::list<glm::ivec3> list, axis w)
 			std::cout << "currentP is " << i3_to_string(currentP) << "\n";
 			currentP[w] += sign(P1[w] - P0[w]);
 			std::cout << "Adding " << i3_to_string(currentP) << " to list\n";
-			list.push_back(currentP);
+			list.push_front(currentP);
 		}
 	}
 	else
@@ -601,8 +603,8 @@ void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 	glm::ivec3 P0, P2 - the two points connected directly by E1
 	axis domAxis - the dominant axis of the triangle
 */
-void fillInterior(std::list<glm::ivec3> E0, 
-				 std::list<glm::ivec3> E1, 
+void fillInterior(std::forward_list<glm::ivec3> E0, 
+				 std::forward_list<glm::ivec3> E1, 
 				 glm::ivec3 P0, 
 				 glm::ivec3 P2, 
 				 axis domAxis)
@@ -611,8 +613,8 @@ void fillInterior(std::list<glm::ivec3> E0,
 		throw std::invalid_argument("Dominant axis must be 0, 1, or 2");
 
 	
-	std::list<glm::ivec3>::iterator itE0 = E0.begin();
-	std::list<glm::ivec3>::iterator itE1 = E1.begin();
+	auto itE0 = E0.begin();
+	auto itE1 = E1.begin();
 
 	std::cout << "Starting to slice...\n";
 	//splices triangle into 2D splices based on the dominant axis
@@ -622,12 +624,12 @@ void fillInterior(std::list<glm::ivec3> E0,
 		std::cout << "Calculating at axis " << std::to_string(domAxis) << 
 			": " << std::to_string(slice) << ".\n";
 		std::cout << "Getting first subsequence...\n";
-		std::list<glm::ivec3> sliceE0 = getSubSequence(itE0, domAxis, slice);
+		std::forward_list<glm::ivec3> sliceE0 = getSubSequence(itE0, domAxis, slice);
 		std::cout << "Getting second subsequence...\n";
-		std::list<glm::ivec3> sliceE1 = getSubSequence(itE1, domAxis, slice);
+		std::forward_list<glm::ivec3> sliceE1 = getSubSequence(itE1, domAxis, slice);
 
-		std::list<glm::ivec3>::iterator itSliceE0 = sliceE0.begin();
-		std::list<glm::ivec3>::iterator itSliceE1 = sliceE1.begin();
+		auto itSliceE0 = sliceE0.begin();
+		auto itSliceE1 = sliceE1.begin();
 		
 		std::cout << "Calculating line from " << i3_to_string(*itSliceE0) 
 			<< " to " << i3_to_string(*itSliceE1) << ".\n";
@@ -678,44 +680,19 @@ void fillInterior(std::list<glm::ivec3> E0,
 	axis w - the dominant axis
 	int compare - what w-level we are comparing it to
 */
-std::list<glm::ivec3> getSubSequence(std::list<glm::ivec3>::iterator it, axis w, int compare)
+std::forward_list<glm::ivec3> getSubSequence(std::forward_list<glm::ivec3>::iterator it, axis w, int compare)
 {
-	std::list<glm::ivec3> subsequence;
+	std::forward_list<glm::ivec3> subsequence;
 	int i = 0; // strange bug where some triangles (randomly) appear to infinitely
 			   // add voxels to a list, so this is just preventing that while
 			   // I need to fix it
 			   
-	//not happy with this, it's not very clean
-	if (w == 0) //dom axis = x
+	while ((*it)[w] == compare && i < 1000)
 	{
-		while (it->x == compare && i < 4000)
-		{
-			subsequence.push_back(*it);
-			std::advance(it, 1);
-			i++;
-		}
+		subsequence.push_front(*it);
+		it++;
+		i++;
 	}
-	else if (w == 1) //dom axis = y
-	{
-		while (it->y == compare && i < 4000)
-		{
-			subsequence.push_back(*it);
-			std::advance(it, 1);
-			i++;
-		}
-	}
-	else if (w == 2) //dom axis = z
-	{
-		while (it->z == compare && i < 4000)
-		{
-			subsequence.push_back(*it);
-			std::advance(it, 1);
-			i++;
-		}
-	}
-	else
-		throw std::invalid_argument("Axis w must be 0, 1, or 2");
-
 	return subsequence;
 }
 
@@ -833,9 +810,9 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 	}
 }
 
-std::list<glm::ivec3> end()
+std::forward_list<glm::ivec3> end()
 {
-	std::list<glm::ivec3> list;
+	std::forward_list<glm::ivec3> list;
 	(*root).allPointsAtDepth(list, depth);
 	return list;
 }

@@ -48,7 +48,7 @@ public:
 		node6 = nullptr;
 		node7 = nullptr;
 	}
-	void allPointsAtDepth(std::list<glm::ivec3> list, uint8_t depth)
+	void allPointsAtDepth(std::forward_list<glm::ivec3> list, uint8_t depth)
 	{
 		std::cout << "Depth: " << std::to_string(depth) << "\n";
 		if (depth == 0)
@@ -57,7 +57,7 @@ public:
 			{
 				if (children[i] != nullptr)
 				{
-					list.push_back(children[i]->coordinate);
+					list.push_front(children[i]->coordinate);
 					std::cout << "Adding " << i3_to_string(children[i]->coordinate) 
 						<< " to list\n";
 				}
