@@ -19,4 +19,14 @@ int smallIntPow(int x, uint8_t p)
 	if (p % 2 == 0) return tmp * tmp;
 	else return x * tmp * tmp;
 }
+unsigned int size(std::forward_list<glm::ivec3> list)
+{
+	auto it = list.begin();
+	unsigned int sum = 0;
+	while (it != list.end())
+	{
+		sum++;
+		it++;
+	}
+}
 #endif // !MATH_H
