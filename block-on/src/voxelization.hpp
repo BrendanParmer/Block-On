@@ -3,7 +3,6 @@ TODO
 	-create custom vector class of uint16_t's for maybe half the memory? something to test out i suppose
 	
 	(separate header file so voxelization stays kinda general?)
-	-implement voxel data structure to cubes function 
 	-implement cross-section viewer
 		-probably should optimize so we only draw the 2D component (4 vertices) instead of
 		 the whole cube (8 vertices), since we only need to see the top anyways
@@ -156,10 +155,9 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		std::cout << "Edge voxels are calculated\n\n";
 		
 		//Add edge voxels to octree
-		//was printing size but we don't need a doubly linked list
-		/*std::cout << "E0.size() = " << std::to_string(E0.size()) << "\n";
-		std::cout << "E1.size() = " << std::to_string(E1.size()) << "\n";
-		std::cout << "E2.size() = " << std::to_string(E2.size()) << "\n";*/
+		std::cout << "E0 size = " << std::to_string(size(E0)) << "\n";
+		std::cout << "E1 size = " << std::to_string(size(E1)) << "\n";
+		std::cout << "E2 size = " << std::to_string(size(E2)) << "\n";
 
 		for (auto E0it = E0.begin(); E0it != E0.end(); ++E0it)
 		{
@@ -208,6 +206,7 @@ glm::ivec3 voxelizePoint(float x, float y, float z)
 	return glm::ivec3(round(x), round(y), round(z));
 }
 
+//add to util.h?
 /**
 * Returns true if the two voxels are the same
 * glm::ivec3 P0, P1 - the two voxels being compared
@@ -316,7 +315,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list)
 		//ex: T.x = the distance to the next yz-facet
 		glm::ivec3 T = M;
 		glm::ivec3 currentP = P0;
-		unsigned int count = 0;
+		unsigned int count = 0;//debuggin lol
 		while (!pointEquals(currentP, P1) && count < 100)
 		{
 			unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
@@ -328,7 +327,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list)
 				std::cout << "P0: " << i3_to_string(P0)
 					<< "\nP1: " << i3_to_string(P1)
 					<< "\nCurrentP: " << i3_to_string(currentP) << "\n";
-				std::logic_error("I don't know man");
+				throw std::logic_error("I don't know man");
 			}
 			//find axis with minimum distance to next voxel region face
 			uint8_t min = 0;
@@ -397,7 +396,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 			std::cout << "P0: " << i3_to_string(P0)
 				<< "\nP1: " << i3_to_string(P1)
 				<< "\nCurrentP: " << i3_to_string(currentP) << "\n";
-			std::logic_error("Your logic's bad man");
+			throw std::logic_error("Your logic's bad man");
 		}
 		//find axis with minimum distance to next voxel region face
 		uint8_t min = 0;
@@ -539,6 +538,8 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 				newPoint = glm::ivec3(currentP[v], P0.y, currentP[u]);
 			else if (w == 2) //z
 				newPoint = glm::ivec3(currentP[u], currentP[v], P0.z);
+			else
+				throw std::invalid_argument("w must be 0, 1, or 2");
 			std::cout << "Adding " << i3_to_string(newPoint) << " to octree\n";
 			addVoxelToOctree(newPoint, 0, depth, root);
 			count++;
@@ -590,6 +591,7 @@ void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 		}
 	}
 }
+
 
 /*
 	function to fill the interior of the triangle
@@ -758,6 +760,7 @@ bool lineCondition(glm::ivec3 point, axis w, int dU, int dV, int U, int V)
 	return (m - n <= compare && compare <= m + n);
 }
 
+
 //probably should put in octree class
 /*
 	adds a voxel to an octree
@@ -841,6 +844,7 @@ std::forward_list<glm::ivec3> end()
 	return list;
 }
 
+//move to util?
 std::string i3_to_string(glm::ivec3 P)
 {
 	return "(" + std::to_string(P.x) + ", " + 

@@ -54,9 +54,9 @@ namespace Test
 				glm::ivec3(0, 0, 3), 
 				glm::ivec3(0, 0, 4), 
 				P1 };
-			ILV(P0, P1, list);
+			ILV_1D(P0, P1, list, 2);
 			
-			//Assert::AreEqual(expected.size(), list.size());
+			Assert::AreEqual(size(expected), size(list));
 			auto it1 = list.begin();
 			auto it2 = expected.begin();
 			while (it1 != list.end() && it2 != expected.end())
@@ -64,6 +64,18 @@ namespace Test
 				Assert::AreEqual(pointEquals(*it2, *it1), true);
 				it1++;
 				it2++;
+			}
+			std::forward_list<glm::ivec3> list2;
+			ILV(P0, P1, list2);
+
+			Assert::AreEqual(size(expected), size(list2));
+			auto it3 = list2.begin();
+			auto it4 = expected.begin();
+			while (it3 != list2.end() && it4 != expected.end())
+			{
+				Assert::AreEqual(pointEquals(*it4, *it3), true);
+				it3++;
+				it4++;
 			}
 		}
 		TEST_METHOD(ilv_2d_list)
@@ -78,7 +90,7 @@ namespace Test
 				glm::ivec3(0, 2, 1),
 				P1 };
 			ILV(P0, P1, list);
-			//Assert::AreEqual(expected.size(), list.size());
+			Assert::AreEqual(size(expected), size(list));
 			auto it1 = list.begin();
 			auto it2 = expected.begin();
 			while (it1 != list.end() && it2 != expected.end())
@@ -102,7 +114,7 @@ namespace Test
 				glm::ivec3(2, 2, 1),
 				P1 };
 			ILV(P0, P1, list);
-			//Assert::AreEqual(expected.size(), list.size());
+			Assert::AreEqual(size(expected), size(list));
 			auto it1 = list.begin();
 			auto it2 = expected.begin();
 			while (it1 != list.end() && it2 != expected.end())

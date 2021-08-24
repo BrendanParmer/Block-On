@@ -28,5 +28,6 @@ unsigned int size(std::forward_list<glm::ivec3> list)
 		sum++;
 		it++;
 	}
+	return sum;
 }
 #endif // !MATH_H
