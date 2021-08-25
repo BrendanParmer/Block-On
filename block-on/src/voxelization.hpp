@@ -206,16 +206,6 @@ glm::ivec3 voxelizePoint(float x, float y, float z)
 	return glm::ivec3(round(x), round(y), round(z));
 }
 
-//add to util.h?
-/**
-* Returns true if the two voxels are the same
-* glm::ivec3 P0, P1 - the two voxels being compared
-*/
-bool pointEquals(glm::ivec3 P0, glm::ivec3 P1)
-{
-	return P0.x == P1.x && P0.y == P1.y && P0.z == P1.z;
-}
-
 /*
 *	approximates the dominant axis by taking the cross product of the 
 *	integer approximations of the edge vectors, determined by voxelized

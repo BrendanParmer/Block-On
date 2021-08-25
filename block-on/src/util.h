@@ -9,6 +9,7 @@
 int smallIntPow(int x, uint8_t p);
 unsigned int size(std::forward_list<glm::ivec3> list);
 std::string i3_to_string(glm::ivec3 P);
+bool pointEquals(glm::ivec3 P0, glm::ivec3 P1);
 
 /**
 * Raise an integer to a small power,
@@ -56,5 +57,14 @@ std::string i3_to_string(glm::ivec3 P)
 	return "(" + std::to_string(P.x) + ", " +
 		std::to_string(P.y) + ", " +
 		std::to_string(P.z) + ")";
+}
+
+/**
+* Returns true if the two voxels are the same
+* glm::ivec3 P0, P1 - the two voxels being compared
+*/
+bool pointEquals(glm::ivec3 P0, glm::ivec3 P1)
+{
+	return P0.x == P1.x && P0.y == P1.y && P0.z == P1.z;
 }
 #endif // !UTIL_H
