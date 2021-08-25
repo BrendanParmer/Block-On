@@ -844,11 +844,4 @@ std::forward_list<glm::ivec3> end()
 	return list;
 }
 
-//move to util?
-std::string i3_to_string(glm::ivec3 P)
-{
-	return "(" + std::to_string(P.x) + ", " + 
-				 std::to_string(P.y) + ", " + 
-				 std::to_string(P.z) + ")";
-}
 #endif
