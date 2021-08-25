@@ -124,5 +124,13 @@ namespace Test
 				it2++;
 			}
 		}
+		TEST_METHOD(pushfront)
+		{
+			std::forward_list<glm::ivec3> list;
+			glm::ivec3 point = glm::ivec3(1, 1, 1);
+			unsigned int expected_size = 1;
+			list.push_front(point);
+			Assert::AreEqual(expected_size, size(list));
+		}
 	};
 }

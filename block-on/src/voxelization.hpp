@@ -41,7 +41,7 @@ void voxelizeTriangle(float x0, float y0, float z0,
 glm::ivec3 voxelizePoint(glm::vec3 p);
 glm::ivec3 voxelizePoint(float x, float y, float z);
 
-bool pointEquals(glm::ivec3 P0, glm::ivec3 P1);
+bool pointEquals(glm::ivec3 P0, glm::ivec3 P1); //util.h
 
 axis dominantAxis(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2);
 void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis anAxis);
@@ -64,10 +64,10 @@ bool lineCondition(glm::ivec3 point, axis w, int dU, int dV, int U, int V);
 
 void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode root);
 
-int smallIntPow(int x, uint8_t p); //from util.h
+int smallIntPow(int x, uint8_t p); //util.h
 
 std::forward_list<glm::ivec3> end();
-std::string i3_to_string(glm::ivec3 P);
+std::string i3_to_string(glm::ivec3 P); //util.h
 
 
 
@@ -141,16 +141,14 @@ void voxelizeTriangle(float x0, float y0, float z0,
 		std::cout << "Points are sorted\n\n";
 
 		//establishes edge voxels in a linked list
-		std::forward_list<glm::ivec3> E0;
-		std::forward_list<glm::ivec3> E1;
-		std::forward_list<glm::ivec3> E2;
+		std::forward_list<glm::ivec3> E0, E1, E2;
 
 		//Calculate edge voxels
 		std::cout << "\nILV P0: " << i3_to_string(P0) << " and P1: " << i3_to_string(P1) << "\n";
 		ILV(P0, P1, E0);
 		std::cout << "\nILV P0: " << i3_to_string(P0) << " and P2: " << i3_to_string(P2) << "\n";
 		ILV(P0, P2, E1);
-		std::cout << "\nILV P1: " << i3_to_string(P1) << " and P2: " << i3_to_string(P2) <<"\n";
+		std::cout << "\nILV P1: " << i3_to_string(P1) << " and P2: " << i3_to_string(P2) << "\n";
 		ILV(P1, P2, E2);
 		std::cout << "Edge voxels are calculated\n\n";
 		
@@ -640,9 +638,9 @@ void fillInterior(std::forward_list<glm::ivec3> E0,
 		while (itSliceE0 != sliceE0.end() && itSliceE1 != sliceE1.end())
 		{
 			if (lineCondition(*std::next(itSliceE0, 1), domAxis, U1 - U0, V1 - V0, U0, V0)) 
-				std::advance(itSliceE0, 1);
+				itSliceE0++;
 			else if (lineCondition(*std::next(itSliceE1, 1), domAxis, U1 - U0, V1 - V0, U0, V0))
-				std::advance(itSliceE1, 1);
+				itSliceE1++;
 			else
 			{
 				std::cout << "Calculating line from " << i3_to_string(*itSliceE0) 
@@ -679,7 +677,7 @@ std::forward_list<glm::ivec3> getSubSequence(std::forward_list<glm::ivec3>::iter
 			   // add voxels to a list, so this is just preventing that while
 			   // I need to fix it
 	std::cout << "Entering while loop\n";
-	if (w == 0)
+	if (w == 0) //x
 	{
 		while (it->x == compare && i < 1000)
 		{
@@ -689,7 +687,7 @@ std::forward_list<glm::ivec3> getSubSequence(std::forward_list<glm::ivec3>::iter
 			i++;
 		}
 	}
-	else if (w == 1)
+	else if (w == 1) //y
 	{
 		while (it->y == compare && i < 1000)
 		{
@@ -699,7 +697,7 @@ std::forward_list<glm::ivec3> getSubSequence(std::forward_list<glm::ivec3>::iter
 			i++;
 		}
 	}
-	else if (w == 2)
+	else if (w == 2) //z
 	{
 		while (it->z == compare && i < 1000)
 		{
@@ -803,7 +801,7 @@ void addVoxelToOctree(glm::ivec3 P, uint8_t level, uint8_t depth, Octnode main)
 		
 		//std::cout << "Determining z-axis placement...\n";
 		//z
-		if (P.z > main.coordinate.z)\
+		if (P.z > main.coordinate.z)
 		{
 			a |= 1;
 			newPoint.z += half;
