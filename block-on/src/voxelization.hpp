@@ -610,18 +610,48 @@ void fillInterior(std::forward_list<glm::ivec3> E0,
 		int slice = P0[domAxis] + i;
 		std::cout << "Calculating at axis " << std::to_string(domAxis) << 
 			": " << std::to_string(slice) << ".\n";
+		/*
 		std::cout << "Getting first subsequence...\n";
 		std::forward_list<glm::ivec3> sliceE0 = getSubSequence(itE0, domAxis, slice);
 		std::cout << "Getting second subsequence...\n";
 		std::forward_list<glm::ivec3> sliceE1 = getSubSequence(itE1, domAxis, slice);
 
-		auto itSliceE0 = sliceE0.begin();
-		auto itSliceE1 = sliceE1.begin();
+		std::forward_list<glm::ivec3>::iterator itSliceE0 = sliceE0.begin();
+		std::forward_list<glm::ivec3>::iterator itSliceE1 = sliceE1.begin();
 		
 		std::cout << "Calculating line from " << i3_to_string(*itSliceE0) 
 			<< " to " << i3_to_string(*itSliceE1) << ".\n";
 		ILV(*itSliceE0, *itSliceE1, *root);
-		
+		*/
+		glm::ivec3 last0 = *itE0;
+		glm::ivec3 last1 = *itE1;
+		axis u = (domAxis + 1) % 3;
+		axis v = (domAxis - 1) % 3;
+		int U0 = last0[u];
+		int U1 = last1[u];
+		int V0 = last0[v];
+		int V1 = last1[v];
+
+		while ((*itE0)[domAxis] == slice && (*itE1)[domAxis] == slice)
+		{
+			if (lineCondition(*std::next(itE0, 1), domAxis, U1 - U0, V1 - V0, U0, V0))
+				itE0++;
+			else if (lineCondition(*std::next(itE1, 1), domAxis, U1 - U0, V1 - V0, U1, V1))
+				itE1++;
+			else
+			{
+				std::cout << "Calculating line from " << i3_to_string(*itE0)
+					<< " to " << i3_to_string(*itE1) << ".\n";
+				ILV(*itE0, *itE1, *root);
+				last0 = *itE0;
+				last1 = *itE1;
+				int U0 = last0[u];
+				int U1 = last1[u];
+				int V0 = last0[v];
+				int V1 = last1[v];
+			}
+		}
+		/*
 		glm::ivec3 last0 = *itSliceE0;
 		glm::ivec3 last1 = *itSliceE1;
 
@@ -657,6 +687,7 @@ void fillInterior(std::forward_list<glm::ivec3> E0,
 		std::cout << "Calculating line from " << i3_to_string(*sliceE0.end()) 
 			<< " to " << i3_to_string(*sliceE1.end()) << ".\n";
 		ILV(*sliceE0.end(), *sliceE1.end(), *root);
+		*/
 	}
 }
 
