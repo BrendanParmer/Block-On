@@ -16,13 +16,13 @@ namespace Test
 		TEST_METHOD(voxelize_point)
 		{
 			glm::ivec3 expected = glm::ivec3(1, 0, 2);
-			glm::ivec3 actual = voxelizePoint(glm::ivec3(1.2, -0.4, 1.1249));
+			glm::ivec3 actual = voxelizePoint(glm::ivec3(1.2f, -0.4f, 1.1249f));
 			
 			Assert::AreEqual(true, pointEquals(expected, actual));
 
-			actual = voxelizePoint(1.2, -0.4, 1.1249);
+			actual = voxelizePoint(1.2f, -0.4f, 1.1249f);
 			//not sure why, but this is showing up as false. seems fine in production??
-			//Assert::AreEqual(true, pointEquals(expected, actual)); 
+			Assert::AreEqual(true, pointEquals(expected, actual)); 
 		}
 		TEST_METHOD(point_equals)
 		{
@@ -52,9 +52,8 @@ namespace Test
 				glm::ivec3(0, 0, 1), 
 				glm::ivec3(0, 0, 2), 
 				glm::ivec3(0, 0, 3), 
-				glm::ivec3(0, 0, 4), 
-				P1 };
-			ILV_1D(P0, P1, list, 2);
+				glm::ivec3(0, 0, 4) };
+			list = ILV_1D(P0, P1, list, 2);
 			
 			Assert::AreEqual(size(expected), size(list));
 			auto it1 = list.begin();
@@ -66,7 +65,7 @@ namespace Test
 				it2++;
 			}
 			std::forward_list<glm::ivec3> list2;
-			ILV(P0, P1, list2);
+			list2 = ILV(P0, P1, list2);
 
 			Assert::AreEqual(size(expected), size(list2));
 			auto it3 = list2.begin();
@@ -89,7 +88,7 @@ namespace Test
 				glm::ivec3(0, 1, 1),
 				glm::ivec3(0, 2, 1),
 				P1 };
-			ILV(P0, P1, list);
+			list = ILV(P0, P1, list);
 			Assert::AreEqual(size(expected), size(list));
 			auto it1 = list.begin();
 			auto it2 = expected.begin();
@@ -111,9 +110,8 @@ namespace Test
 				glm::ivec3(1, 1, 0),
 				glm::ivec3(1, 1, 1),
 				glm::ivec3(2, 1, 1),
-				glm::ivec3(2, 2, 1),
-				P1 };
-			ILV(P0, P1, list);
+				glm::ivec3(2, 2, 1) };
+			list = ILV(P0, P1, list);
 			Assert::AreEqual(size(expected), size(list));
 			auto it1 = list.begin();
 			auto it2 = expected.begin();
@@ -130,6 +128,8 @@ namespace Test
 			glm::ivec3 point = glm::ivec3(1, 1, 1);
 			unsigned int expected_size = 1;
 			list.push_front(point);
+			Assert::AreEqual(expected_size, size(list));
+			expected_size++;
 			Assert::AreEqual(expected_size, size(list));
 		}
 	};
