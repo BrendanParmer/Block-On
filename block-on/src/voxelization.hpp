@@ -48,7 +48,11 @@ void sortThreeIntPoints(glm::ivec3 P0, glm::ivec3 P1, glm::ivec3 P2, axis anAxis
 
 std::forward_list<glm::ivec3> ILV(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list);
 void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root);
+
 int8_t sign(int num);
+bool tempLoopCondition(glm::ivec3 currentP, glm::ivec3 P1, glm::ivec3 sign_dP);
+bool tempLoopCondition2(glm::ivec2 currentP, glm::ivec2 P1, glm::ivec2 sign_dP);
+
 std::forward_list<glm::ivec3> ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list, axis w);
 void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w);
 std::forward_list<glm::ivec3> ILV_1D(glm::ivec3 P0, glm::ivec3 P1, std::forward_list<glm::ivec3> list, axis w);
@@ -299,7 +303,7 @@ std::forward_list<glm::ivec3> ILV(glm::ivec3 P0, glm::ivec3 P1, std::forward_lis
 	glm::ivec3 T = M;
 	glm::ivec3 currentP = P0;
 	unsigned int count = 0;//debuggin lol
-	while (!pointEquals(currentP, P1) && count < 100)
+	while (!pointEquals(currentP, P1) && tempLoopCondition(currentP, P1, sign_dP))
 	{
 		unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
 		if (distance > orig_distance)
@@ -367,8 +371,7 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 	//ex: T.x = the distance to the next yz-facet
 	glm::ivec3 T = M;
 	glm::ivec3 currentP = P0;
-	unsigned int count = 0;
-	while (!pointEquals(currentP, P1) && count < 100)
+	while (!pointEquals(currentP, P1) && tempLoopCondition(currentP, P1, sign_dP))
 	{
 		unsigned int distance = abs(P1.x - currentP.x) + abs(P1.y - currentP.y) + abs(P1.z - currentP.z);
 		if (distance > orig_distance)
@@ -395,7 +398,6 @@ void ILV(glm::ivec3 P0, glm::ivec3 P1, Octnode root)
 		T[min] = 2 * M[min];
 		std::cout << "Adding " << i3_to_string(currentP) << " to octree\n";
 		addVoxelToOctree(currentP, 0, depth, root);
-		count++;
 	}
 }
 
@@ -410,6 +412,44 @@ int8_t sign(int num)
 		return -1;
 	else
 		return 0;
+}
+
+/*
+* ensures loop doesn't run past where it's supposed to while i need to fix it
+*/
+bool tempLoopCondition(glm::ivec3 currentP, glm::ivec3 P1, glm::ivec3 sign_dP)
+{
+	bool x, y, z;
+	if (sign_dP.x > -1)
+		x = !(currentP.x > P1.x);
+	else
+		x = !(currentP.x < P1.x);
+	if (sign_dP.y > -1)
+		y = !(currentP.y > P1.y);
+	else
+		y = !(currentP.y < P1.y);
+	if (sign_dP.z > -1)
+		z = !(currentP.z > P1.z);
+	else
+		z = !(currentP.z < P1.z);
+	return (x && y && z);
+}
+
+/*
+* 2D version of temporary kicking the can down loop shenanigans
+*/
+bool tempLoopCondition2(glm::ivec2 currentP, glm::ivec2 P1, glm::ivec2 sign_dP)
+{
+	bool x, y;
+	if (sign_dP.x > -1)
+		x = !(currentP.x > P1.x);
+	else
+		x = !(currentP.x < P1.x);
+	if (sign_dP.y > -1)
+		y = !(currentP.y > P1.y);
+	else
+		y = !(currentP.y < P1.y);
+	return x && y;
 }
 
 /**
@@ -443,8 +483,8 @@ std::forward_list<glm::ivec3> ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::forward_
 		glm::ivec2 M = glm::ivec2(abs(dP[1]), abs(dP[0]));
 		glm::ivec2 T = M;
 		glm::ivec2 currentP = glm::ivec2(P0[u], P0[v]);
-		unsigned int count = 0; //debugging stuff
-		while ((currentP[u] != P1[u] || currentP[v] != P1[v]) && count < 100)
+		glm::ivec2 P12D = glm::ivec2(P1[u], P1[v]);
+		while ((currentP[0] != P12D[0] || currentP[1] != P12D[1]) && tempLoopCondition2(currentP, P12D, sign_dP))
 		{
 			uint8_t min;
 			if (T[v] > T[u])
@@ -466,7 +506,6 @@ std::forward_list<glm::ivec3> ILV_2D(glm::ivec3 P0, glm::ivec3 P1, std::forward_
 				throw std::logic_error("Ope your axis was out of bounds");
 			std::cout << "Adding " << i3_to_string(newPoint) << " to list\n";
 			list.push_front(newPoint);
-			count++;
 		}
 		return list;
 	}
@@ -503,8 +542,8 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 		glm::ivec2 M = glm::ivec2(abs(dP[1]), abs(dP[0]));
 		glm::ivec2 T = M;
 		glm::ivec2 currentP = glm::ivec2(P0[u], P0[v]);
-		unsigned int count = 0;
-		while ((currentP[u] != P1[u] || currentP[v] != P1[v]) && count < 100)
+		glm::ivec2 P12D = glm::ivec2(P1[u], P1[v]);
+		while ((currentP[0] != P12D[0] || currentP[1] != P12D[1]) && tempLoopCondition2(currentP, P12D, sign_dP))
 		{
 			uint8_t min;
 			if (T[v] > T[u])
@@ -526,7 +565,6 @@ void ILV_2D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 				throw std::invalid_argument("w must be 0, 1, or 2");
 			std::cout << "Adding " << i3_to_string(newPoint) << " to octree\n";
 			addVoxelToOctree(newPoint, 0, depth, root);
-			count++;
 		}
 	}
 }
@@ -576,7 +614,6 @@ void ILV_1D(glm::ivec3 P0, glm::ivec3 P1, Octnode root, axis w)
 		}
 	}
 }
-
 
 /*
 	function to fill the interior of the triangle
