@@ -129,8 +129,6 @@ namespace Test
 			unsigned int expected_size = 1;
 			list.push_front(point);
 			Assert::AreEqual(expected_size, size(list));
-			expected_size++;
-			Assert::AreEqual(expected_size, size(list));
 		}
 	};
 }

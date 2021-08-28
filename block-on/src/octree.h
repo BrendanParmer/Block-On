@@ -51,13 +51,14 @@ public:
 	void allPointsAtDepth(std::forward_list<glm::ivec3> list, uint8_t depth)
 	{
 		std::cout << "Depth: " << std::to_string(depth) << "\n";
+		std::forward_list<glm::ivec3>& list1 = list;
 		if (depth == 0)
 		{
 			for (uint8_t i = 0; i < 8; i++)
 			{
 				if (children[i] != nullptr)
 				{
-					list.push_front(children[i]->coordinate);
+					list1.push_front(children[i]->coordinate);
 					std::cout << "Adding " << i3_to_string(children[i]->coordinate) 
 						<< " to list\n";
 				}
@@ -68,7 +69,7 @@ public:
 			for (uint8_t i = 0; i < 8; i++)
 			{
 				if (children[i] != nullptr)
-					(*children[i]).allPointsAtDepth(list, depth - 1);
+					(*children[i]).allPointsAtDepth(list1, depth - 1);
 			}
 		}
 	}
