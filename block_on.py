@@ -21,7 +21,6 @@ class block_on(bpy.types.Operator):
         modifier = obj.modifiers.new(name = "Block On", type = "NODES")
         bpy.data.node_groups.remove(modifier.node_group)
         modifier.node_group = bpy.data.node_groups["Block On " + name]
-        obj.modifiers["Block On"]["Resolution"] = 32
         return {"FINISHED"}
         
 
@@ -30,14 +29,14 @@ def block_on_node_group(obj_name):
     bo = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Block On " + obj_name)
 
     #input node
-    bo.inputs.new("NodeSocketGeometry",   "Geometry")
-    bo.inputs.new("NodeSocketInt",        "Resolution")
-    bo.inputs.new("NodeSocketFloat",      "Cube Size")
-    bo.inputs.new("NodeSocketInt",        "Level")
-    bo.inputs.new("NodeSocketInt",        "Levels Visible")
-    bo.inputs.new("NodeSocketFloat",      "Density")
-    bo.inputs.new("NodeSocketInt",        "Seed")
-    bo.inputs.new("NodeSocketBool",       "On Points")
+    bo.inputs.new("NodeSocketGeometry", "Geometry")
+    bo.inputs.new("NodeSocketInt",      "Resolution")
+    bo.inputs.new("NodeSocketFloat",    "Cube Size")
+    bo.inputs.new("NodeSocketInt",      "Level")
+    bo.inputs.new("NodeSocketInt",      "Levels Visible")
+    bo.inputs.new("NodeSocketFloat",    "Density")
+    bo.inputs.new("NodeSocketInt",      "Seed")
+    bo.inputs.new("NodeSocketBool",     "On Points")
 
     bo_input = bo.nodes.new("NodeGroupInput")
     bo_input.location = (0,0)
@@ -49,8 +48,8 @@ def block_on_node_group(obj_name):
     
     bo_tm.node_tree = bpy.data.node_groups["Transform Mesh " + obj_name]
     
-    bo.links.new(bo_input.outputs["Geometry"],      bo_tm.inputs["Geometry"])
-    bo.links.new(bo_input.outputs["Resolution"],    bo_tm.inputs["Resolution"])
+    bo.links.new(bo_input.outputs["Geometry"],   bo_tm.inputs["Geometry"])
+    bo.links.new(bo_input.outputs["Resolution"], bo_tm.inputs["Resolution"])
     
     #instance cube
     bo_cube = bo.nodes.new("GeometryNodeMeshCube")
@@ -64,12 +63,12 @@ def block_on_node_group(obj_name):
     
     bo_gc.node_tree = bpy.data.node_groups["Generate Cubes " + obj_name]
     
-    bo.links.new(bo_tm.outputs["Geometry"],             bo_gc.inputs["Mesh"])
-    bo.links.new(bo_cube.outputs["Mesh"],               bo_gc.inputs["Instance"])
-    bo.links.new(bo_input.outputs["Level"],             bo_gc.inputs["Level"])
-    bo.links.new(bo_input.outputs["Levels Visible"],    bo_gc.inputs["Levels Visible"])
-    bo.links.new(bo_input.outputs["Density"],           bo_gc.inputs["Density"])
-    bo.links.new(bo_input.outputs["Seed"],              bo_gc.inputs["Seed"])
+    bo.links.new(bo_tm.outputs["Geometry"],          bo_gc.inputs["Mesh"])
+    bo.links.new(bo_cube.outputs["Mesh"],            bo_gc.inputs["Instance"])
+    bo.links.new(bo_input.outputs["Level"],          bo_gc.inputs["Level"])
+    bo.links.new(bo_input.outputs["Levels Visible"], bo_gc.inputs["Levels Visible"])
+    bo.links.new(bo_input.outputs["Density"],        bo_gc.inputs["Density"])
+    bo.links.new(bo_input.outputs["Seed"],           bo_gc.inputs["Seed"])
     
     #On Points
     on_points_node_group(obj_name)
@@ -78,9 +77,8 @@ def block_on_node_group(obj_name):
     
     bo_op.node_tree = bpy.data.node_groups["On Points " + obj_name]
     
-    bo.links.new(bo_gc.outputs["Geometry"], bo_op.inputs["Geometry"])
+    bo.links.new(bo_gc.outputs["Geometry"],     bo_op.inputs["Geometry"])
     bo.links.new(bo_input.outputs["On Points"], bo_op.inputs["On Points"])
-    
     
     #output node
     bo.outputs.new("NodeSocketGeometry", "Geometry")
@@ -119,8 +117,8 @@ def transform_mesh_node_group(set_name):
     tm = bpy.data.node_groups.new(type="GeometryNodeTree", name = "Transform Mesh " + set_name)
     
     #input node
-    tm.inputs.new("NodeSocketGeometry",     "Geometry")
-    tm.inputs.new("NodeSocketInt",          "Resolution")
+    tm.inputs.new("NodeSocketGeometry", "Geometry")
+    tm.inputs.new("NodeSocketInt",      "Resolution")
     
     tm_input = tm.nodes.new("NodeGroupInput")
     tm_input.location = (0,0)
@@ -147,8 +145,7 @@ def transform_mesh_node_group(set_name):
     tm_as_x.hide = True
     
     tm.links.new(tm_input.outputs["Geometry"], tm_as_x.inputs["Geometry"])
-    #tm.links.new(tm_pos.outputs["Position"], tm_as.inputs["Attribute"]) #why are you working with float but not float vector???
-    tm.links.new(tm_sep_xyz.outputs["X"], tm_as_x.inputs["Attribute"])
+    tm.links.new(tm_sep_xyz.outputs["X"],      tm_as_x.inputs["Attribute"])
     
     #attribute statistic y
     tm_as_y = tm.nodes.new("GeometryNodeAttributeStatistic")
@@ -156,7 +153,7 @@ def transform_mesh_node_group(set_name):
     tm_as_y.hide = True
     
     tm.links.new(tm_input.outputs["Geometry"], tm_as_y.inputs["Geometry"])
-    tm.links.new(tm_sep_xyz.outputs["Y"], tm_as_y.inputs["Attribute"])
+    tm.links.new(tm_sep_xyz.outputs["Y"],      tm_as_y.inputs["Attribute"])
     
     #attribute statistic z
     tm_as_z = tm.nodes.new("GeometryNodeAttributeStatistic")
@@ -164,7 +161,7 @@ def transform_mesh_node_group(set_name):
     tm_as_z.hide = True
     
     tm.links.new(tm_input.outputs["Geometry"], tm_as_z.inputs["Geometry"])
-    tm.links.new(tm_sep_xyz.outputs["Z"], tm_as_z.inputs["Attribute"])
+    tm.links.new(tm_sep_xyz.outputs["Z"],      tm_as_z.inputs["Attribute"])
     
     
     #max one
@@ -184,7 +181,7 @@ def transform_mesh_node_group(set_name):
     
     tm_max_2.operation = "MAXIMUM"
     
-    tm.links.new(tm_max_1.outputs[0], tm_max_2.inputs[0])
+    tm.links.new(tm_max_1.outputs[0],      tm_max_2.inputs[0])
     tm.links.new(tm_as_z.outputs["Range"], tm_max_2.inputs[1])
 
     #subtract
@@ -203,7 +200,7 @@ def transform_mesh_node_group(set_name):
     
     tm_div.operation = "DIVIDE"
     
-    tm.links.new(tm_sub.outputs[0], tm_div.inputs[0])
+    tm.links.new(tm_sub.outputs[0],   tm_div.inputs[0])
     tm.links.new(tm_max_2.outputs[0], tm_div.inputs[1])
     
     #scalar multiply
@@ -246,8 +243,8 @@ def transform_mesh_node_group(set_name):
     tm_transform.location = (1600, -200)
     
     tm.links.new(tm_input.outputs["Geometry"], tm_transform.inputs["Geometry"])
-    tm.links.new(tm_vec_add.outputs[0], tm_transform.inputs["Translation"])
-    tm.links.new(tm_div.outputs[0], tm_transform.inputs["Scale"])
+    tm.links.new(tm_vec_add.outputs[0],        tm_transform.inputs["Translation"])
+    tm.links.new(tm_div.outputs[0],            tm_transform.inputs["Scale"])
     
     #output node
     tm.outputs.new("NodeSocketGeometry", "Geometry")
@@ -259,15 +256,15 @@ def transform_mesh_node_group(set_name):
 
 
 def generate_cubes_node_group(set_name):
-    gc = bpy.data.node_groups.new(type="GeometryNodeTree", name = "Generate Cubes " + set_name)
+    gc = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Generate Cubes " + set_name)
     
     #input node
-    gc.inputs.new("NodeSocketGeometry",     "Mesh")
-    gc.inputs.new("NodeSocketGeometry",     "Instance")
-    gc.inputs.new("NodeSocketInt",          "Level")
-    gc.inputs.new("NodeSocketInt",          "Levels Visible")
-    gc.inputs.new("NodeSocketFloat",        "Density")
-    gc.inputs.new("NodeSocketInt",          "Seed")
+    gc.inputs.new("NodeSocketGeometry", "Mesh")
+    gc.inputs.new("NodeSocketGeometry", "Instance")
+    gc.inputs.new("NodeSocketInt",      "Level")
+    gc.inputs.new("NodeSocketInt",      "Levels Visible")
+    gc.inputs.new("NodeSocketFloat",    "Density")
+    gc.inputs.new("NodeSocketInt",      "Seed")
     
     gc_input = gc.nodes.new("NodeGroupInput")
     gc_input.location = (0,0)
@@ -290,14 +287,13 @@ def generate_cubes_node_group(set_name):
         gc_m.node_tree = bpy.data.node_groups["Material " + set_name]
         gc_m.inputs["Material"].default_value = material
         
-        
         #inputs
-        gc.links.new(gc_input.outputs["Mesh"],              gc_m.inputs["Mesh"])
-        gc.links.new(gc_input.outputs["Instance"],          gc_m.inputs["Instance"])
-        gc.links.new(gc_input.outputs["Level"],             gc_m.inputs["Level"])
-        gc.links.new(gc_input.outputs["Levels Visible"],    gc_m.inputs["Levels Visible"])
-        gc.links.new(gc_input.outputs["Density"],           gc_m.inputs["Density"])
-        gc.links.new(gc_input.outputs["Seed"],              gc_m.inputs["Seed"])
+        gc.links.new(gc_input.outputs["Mesh"],           gc_m.inputs["Mesh"])
+        gc.links.new(gc_input.outputs["Instance"],       gc_m.inputs["Instance"])
+        gc.links.new(gc_input.outputs["Level"],          gc_m.inputs["Level"])
+        gc.links.new(gc_input.outputs["Levels Visible"], gc_m.inputs["Levels Visible"])
+        gc.links.new(gc_input.outputs["Density"],        gc_m.inputs["Density"])
+        gc.links.new(gc_input.outputs["Seed"],           gc_m.inputs["Seed"])
         
         #output
         gc.links.new(gc_m.outputs["Geometry"], gc_join.inputs[0])
@@ -315,16 +311,16 @@ def generate_cubes_node_group(set_name):
   
     
 def material_node_group(set_name):
-    m = bpy.data.node_groups.new(type="GeometryNodeTree", name = "Material " + set_name)
+    m = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Material " + set_name)
     
     #input node
-    m.inputs.new("NodeSocketGeometry",      "Mesh")
-    m.inputs.new("NodeSocketGeometry",      "Instance")
-    m.inputs.new("NodeSocketInt",           "Level")
-    m.inputs.new("NodeSocketInt",           "Levels Visible")
-    m.inputs.new("NodeSocketFloat",         "Density")
-    m.inputs.new("NodeSocketInt",           "Seed")
-    m.inputs.new("NodeSocketMaterial",      "Material")
+    m.inputs.new("NodeSocketGeometry", "Mesh")
+    m.inputs.new("NodeSocketGeometry", "Instance")
+    m.inputs.new("NodeSocketInt",      "Level")
+    m.inputs.new("NodeSocketInt",      "Levels Visible")
+    m.inputs.new("NodeSocketFloat",    "Density")
+    m.inputs.new("NodeSocketInt",      "Seed")
+    m.inputs.new("NodeSocketMaterial", "Material")
     
     m_input = m.nodes.new("NodeGroupInput")
     m_input.location = (0, 0)
@@ -362,16 +358,16 @@ def material_node_group(set_name):
     
     m_lv.node_tree = bpy.data.node_groups["Level Viewer " + set_name]
     
-    m.links.new(m_input.outputs["Level"], m_lv.inputs["Level"])
+    m.links.new(m_input.outputs["Level"],          m_lv.inputs["Level"])
     m.links.new(m_input.outputs["Levels Visible"], m_lv.inputs["Levels Visible"])
     
     #instance on points
     m_iop = m.nodes.new("GeometryNodeInstanceOnPoints")
     m_iop.location = (800, 0)
     
-    m.links.new(m_v.outputs["Geometry"],        m_iop.inputs["Points"])
-    m.links.new(m_lv.outputs[0],                m_iop.inputs["Selection"])
-    m.links.new(m_input.outputs["Instance"],    m_iop.inputs["Instance"])
+    m.links.new(m_v.outputs["Geometry"],     m_iop.inputs["Points"])
+    m.links.new(m_lv.outputs[0],             m_iop.inputs["Selection"])
+    m.links.new(m_input.outputs["Instance"], m_iop.inputs["Instance"])
     
     #realize instances
     m_ri = m.nodes.new("GeometryNodeRealizeInstances")
@@ -383,8 +379,8 @@ def material_node_group(set_name):
     m_sm = m.nodes.new("GeometryNodeSetMaterial")
     m_sm.location = (1200, 0)
 
-    m.links.new(m_ri.outputs["Geometry"],       m_sm.inputs["Geometry"])
-    m.links.new(m_input.outputs["Material"],    m_sm.inputs["Material"])
+    m.links.new(m_ri.outputs["Geometry"],    m_sm.inputs["Geometry"])
+    m.links.new(m_input.outputs["Material"], m_sm.inputs["Material"])
 
     #output node
     m.outputs.new("NodeSocketGeometry", "Geometry")
@@ -397,7 +393,7 @@ def material_node_group(set_name):
   
     
 def voxelize_node_group(set_name):
-    v = bpy.data.node_groups.new(type="GeometryNodeTree", name = "Voxelize " + set_name)
+    v = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Voxelize " + set_name)
     
     #input node
     v.inputs.new("NodeSocketGeometry", "Geometry")
@@ -424,16 +420,16 @@ def voxelize_node_group(set_name):
     
     v_sub.operation = "SUBTRACT"
     
-    v.links.new(v_snap.outputs[0], v_sub.inputs[0])
+    v.links.new(v_snap.outputs[0],         v_sub.inputs[0])
     v.links.new(v_pos.outputs["Position"], v_sub.inputs[1])
     
     #set position
     v_sp = v.nodes.new("GeometryNodeSetPosition")
     v_sp.location = (600, 0)
     
-    v.links.new(v_input.outputs["Geometry"],    v_sp.inputs["Geometry"])
-    v.links.new(v_pos.outputs["Position"],      v_sp.inputs["Position"])
-    v.links.new(v_sub.outputs[0],               v_sp.inputs["Offset"])
+    v.links.new(v_input.outputs["Geometry"], v_sp.inputs["Geometry"])
+    v.links.new(v_pos.outputs["Position"],   v_sp.inputs["Position"])
+    v.links.new(v_sub.outputs[0],            v_sp.inputs["Offset"])
     
     #output node
     v.outputs.new("NodeSocketGeometry", "Geometry")
@@ -446,7 +442,7 @@ def voxelize_node_group(set_name):
   
 
 def level_viewer_node_group(set_name):
-    lv = bpy.data.node_groups.new(type="GeometryNodeTree", name = "Level Viewer " + set_name)
+    lv = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Level Viewer " + set_name)
     
     #input node
     lv.inputs.new("NodeSocketInt", "Level")
@@ -477,7 +473,7 @@ def level_viewer_node_group(set_name):
     lv_add_lv.location = (400, 0)
     
     lv.links.new(lv_input.outputs["Level"], lv_add_lv.inputs[0])
-    lv.links.new(lv_add_one.outputs[0], lv_add_lv.inputs[1])
+    lv.links.new(lv_add_one.outputs[0],     lv_add_lv.inputs[1])
     
     # lte
     lv_lte = lv.nodes.new("FunctionNodeCompareFloats")
@@ -485,7 +481,7 @@ def level_viewer_node_group(set_name):
     
     lv_lte.operation = "LESS_EQUAL"
     
-    lv.links.new(lv_sep.outputs["Z"], lv_lte.inputs["A"])
+    lv.links.new(lv_sep.outputs["Z"],       lv_lte.inputs["A"])
     lv.links.new(lv_input.outputs["Level"], lv_lte.inputs["B"])
     
     #gte
@@ -494,7 +490,7 @@ def level_viewer_node_group(set_name):
     
     lv_gte.operation = "GREATER_EQUAL"
     
-    lv.links.new(lv_sep.outputs["Z"], lv_gte.inputs["A"])
+    lv.links.new(lv_sep.outputs["Z"],  lv_gte.inputs["A"])
     lv.links.new(lv_add_lv.outputs[0], lv_gte.inputs["B"])
     
     #or
@@ -526,11 +522,11 @@ def level_viewer_node_group(set_name):
 
 
 def on_points_node_group(set_name):
-    op = bpy.data.node_groups.new(type="GeometryNodeTree", name = "On Points " + set_name)
+    op = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "On Points " + set_name)
     
     #input node
     op.inputs.new("NodeSocketGeometry", "Geometry")
-    op.inputs.new("NodeSocketBool", "On Points")
+    op.inputs.new("NodeSocketBool",     "On Points")
     
     op_input = op.nodes.new("NodeGroupInput")
     op_input.location = (0, 0)
@@ -557,7 +553,7 @@ def on_points_node_group(set_name):
     op_transform.location = (600, 0)
     
     op.links.new(op_input.outputs["Geometry"], op_transform.inputs["Geometry"])
-    op.links.new(op_mul.outputs[0], op_transform.inputs["Translation"])
+    op.links.new(op_mul.outputs[0],            op_transform.inputs["Translation"])
     
     #output node
     op.outputs.new("NodeSocketGeometry", "Geometry")
