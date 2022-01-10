@@ -15,9 +15,19 @@ class block_on(bpy.types.Operator):
     bl_option = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
+        #set up
         name = bpy.context.object.name
-        block_on_node_group(obj_name = name)
         obj = bpy.data.objects[name]
+        
+        #assign material if none exists
+        if not obj.data.materials:
+            mat = bpy.data.materials.get("Material")
+            if mat is None:
+                mat = bpy.data.materials.new(name="Material")
+            obj.data.materials.append(mat)
+        
+        #block on modifier
+        block_on_node_group(obj_name = name)
         modifier = obj.modifiers.new(name = "Block On", type = "NODES")
         bpy.data.node_groups.remove(modifier.node_group)
         modifier.node_group = bpy.data.node_groups["Block On " + name]
