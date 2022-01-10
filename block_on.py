@@ -26,11 +26,32 @@ class block_on(bpy.types.Operator):
                 mat = bpy.data.materials.new(name="Material")
             obj.data.materials.append(mat)
         
+        #delete old block_on stuff if it exists
+        #modifier
+        old_mod = obj.modifiers.get("Block On")
+        if old_mod is not None:
+            obj.modifiers.remove(old_mod)
+            
+        #node groups
+        block_on_groups = ["Block On ", 
+                           "Generate Cubes ", 
+                           "Level Viewer ", 
+                           "Material ", 
+                           "On Points ",
+                           "Transform Mesh ",
+                           "Voxelize "]
+        node_groups = bpy.data.node_groups
+        
+        for group_name in block_on_groups:
+            group = node_groups.get(group_name + name)
+            if group is not None:
+                node_groups.remove(group) 
+      
         #block on modifier
         block_on_node_group(obj_name = name)
         modifier = obj.modifiers.new(name = "Block On", type = "NODES")
-        bpy.data.node_groups.remove(modifier.node_group)
-        modifier.node_group = bpy.data.node_groups["Block On " + name]
+        node_groups.remove(modifier.node_group)
+        modifier.node_group = node_groups["Block On " + name]
         return {"FINISHED"}
         
 
