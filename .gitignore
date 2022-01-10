@@ -1,8 +1,1 @@
-out/
-build/
-.vs/
 .vscode/
-Tests/
-x64/
-python/
-Release/
