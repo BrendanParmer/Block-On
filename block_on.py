@@ -201,7 +201,7 @@ def transform_mesh_node_group(set_name):
     tm_sub.operation = "SUBTRACT"
     
     tm.links.new(tm_input.outputs["Resolution"], tm_sub.inputs[0])
-    tm_sub.inputs[1].default_value = -1.0
+    tm_sub.inputs[1].default_value = 1.0
     
     #divide
     tm_div = tm.nodes.new("ShaderNodeMath")
