@@ -214,24 +214,15 @@ def transform_mesh_node_group(set_name):
     
     tm.links.new(tm_max_1.outputs[0],      tm_max_2.inputs[0])
     tm.links.new(tm_as_z.outputs["Range"], tm_max_2.inputs[1])
-
-    #subtract
-    tm_sub = tm.nodes.new("ShaderNodeMath")
-    tm_sub.location = (600, 0)
-    
-    tm_sub.operation = "SUBTRACT"
-    
-    tm.links.new(tm_input.outputs["Resolution"], tm_sub.inputs[0])
-    tm_sub.inputs[1].default_value = 1.0
     
     #divide
     tm_div = tm.nodes.new("ShaderNodeMath")
-    tm_div.location = (800, -225)
+    tm_div.location = (800, -200)
     tm_div.hide = True
     
     tm_div.operation = "DIVIDE"
     
-    tm.links.new(tm_sub.outputs[0],   tm_div.inputs[0])
+    tm.links.new(tm_input.outputs["Resolution"], tm_div.inputs[0])
     tm.links.new(tm_max_2.outputs[0], tm_div.inputs[1])
     
     #scalar multiply
