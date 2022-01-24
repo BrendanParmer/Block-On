@@ -1,9 +1,33 @@
 # Block-On
 
 ## A Blender add-on for procedural voxelization of meshes with cross-secton viewing. 
+**VIDEO TUTORIAL COMING SOON**
 
-![Before](https://github.com/BrendanParmer/Block-On/blob/master/before.png?raw=true)
-VIDEO TUTORIAL COMING SOON
+<img 
+     src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/build_animation.gif" 
+     alt="Build animation" 
+     width = "850" 
+     height = "850">
+</img>
+
+<table style="margin-left: auto; margin-right: auto;">
+ <tr>
+  <td>
+   <img src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/before.png" alt = "Before" width = "400" height = "400"/>
+  </td>
+  <td>
+   <img src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/after.png" alt = "After" width = "400" height="400"/>
+  </td>
+ </tr>
+ <tr>
+  <td>
+   <p style="text-align: center;">Before</p>
+  </td>
+  <td>
+   <p style="text-align: center;">After</p>
+  </td>
+ </tr>
+</table>
 
 ### Prerequisites
 * Just Blender 3.0!
@@ -19,7 +43,7 @@ VIDEO TUTORIAL COMING SOON
 
 * Make sure you're using Blender 3.0, as older versions do not have the necessary geometry nodes
 * Download the appropriate file for your Blender installation ( `block_on.py` for Blender 3.0, `block_on_3-1.py` for the Blender 3.1 alpha)
-* To enable the add-on, open Blender and go to Edit>Preferences>Add-ons, and click the Install button in the top-right. From there, navigate to where you downloaded the python file, and click on it to install
+* To enable the add-on, open Blender and go to `Edit > Preferences > Add-ons`, and click the Install button in the top-right. From there, navigate to where you downloaded the python file, and click on it to install
 * Now that you have the Block-On add-on enabled, you can use it by selecting any mesh, going to Object, and hitting the Block-On button. This automatically generates a Geometry Nodes group for your object, with parameters you can adjust in the Modifiers tab
 
 ### Parameters
