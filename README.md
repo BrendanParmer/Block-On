@@ -2,6 +2,7 @@
 
 ## A Blender add-on for procedural voxelization of meshes with cross-secton viewing. 
 
+![Before](https://github.com/BrendanParmer/Block-On/blob/master/before.png?raw=true)
 VIDEO TUTORIAL COMING SOON
 
 ### Prerequisites
