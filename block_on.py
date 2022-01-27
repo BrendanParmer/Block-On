@@ -2,7 +2,7 @@ bl_info = {
     "name" : "Block On",
     "description" : "Voxelize object and view its cross sections",
     "author" : "Brendan Parmer", 
-    "version" : (1, 0, 0),
+    "version" : (1, 1, 0),
     "blender" : (3, 0, 0),
     "location" : "Object",
     "category" : "Object"
@@ -498,22 +498,46 @@ def level_viewer_node_group(set_name):
     lv.links.new(lv_add_one.outputs[0],     lv_add_lv.inputs[1])
     
     # lte
-    lv_lte = lv.nodes.new("FunctionNodeCompareFloats")
-    lv_lte.location = (600, -200)
-    
-    lv_lte.operation = "LESS_EQUAL"
-    
-    lv.links.new(lv_sep.outputs["Z"],       lv_lte.inputs["A"])
-    lv.links.new(lv_input.outputs["Level"], lv_lte.inputs["B"])
+    lv_lte = None
+    if bpy.app.version >= (3, 1, 0):
+        lv_lte = lv.nodes.new("FunctionNodeCompare")
+        lv_lte.location = (600, -200)
+
+        lv_lte.operation = "LESS_EQUAL"
+
+        lv.links.new(lv_sep.outputs["Z"],       lv_lte.inputs["A"])
+        lv.links.new(lv_input.outputs["Level"], lv_lte.inputs["B"])
+    elif bpy.app.version >= (3, 0, 0) and bpy.app.version < (3, 1, 0):
+        lv_lte = lv.nodes.new("FunctionNodeCompareFloats")
+        lv_lte.location = (600, -200)
+        
+        lv_lte.operation = "LESS_EQUAL"
+        
+        lv.links.new(lv_sep.outputs["Z"],       lv_lte.inputs["A"])
+        lv.links.new(lv_input.outputs["Level"], lv_lte.inputs["B"])
+    else:
+        print("Sorry, your version of Blender is too old for Block-On to run")
     
     #gte
-    lv_gte = lv.nodes.new("FunctionNodeCompareFloats")
-    lv_gte.location = (600, -400)
-    
-    lv_gte.operation = "GREATER_EQUAL"
-    
-    lv.links.new(lv_sep.outputs["Z"],  lv_gte.inputs["A"])
-    lv.links.new(lv_add_lv.outputs[0], lv_gte.inputs["B"])
+    lv_gte = None
+    if bpy.app.version >= (3, 1, 0):
+        lv_gte = lv.nodes.new("FunctionNodeCompare")
+        lv_gte.location = (600, -400)
+        
+        lv_gte.operation = "GREATER_EQUAL"
+        
+        lv.links.new(lv_sep.outputs["Z"],  lv_gte.inputs["A"])
+        lv.links.new(lv_add_lv.outputs[0], lv_gte.inputs["B"])
+    elif bpy.app.version >= (3, 0, 0) and bpy.app.version < (3, 1, 0):
+        lv_gte = lv.nodes.new("FunctionNodeCompareFloats")
+        lv_gte.location = (600, -400)
+        
+        lv_gte.operation = "GREATER_EQUAL"
+        
+        lv.links.new(lv_sep.outputs["Z"],  lv_gte.inputs["A"])
+        lv.links.new(lv_add_lv.outputs[0], lv_gte.inputs["B"])
+    else:
+        print("Sorry, your version of Blender is too old for Block-On to run")
     
     #or
     lv_or = lv.nodes.new("FunctionNodeBooleanMath")
