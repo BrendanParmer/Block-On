@@ -43,7 +43,7 @@
 
 ## How to use
 
-* Make sure you're using Blender 3.0, as older versions do not have the necessary geometry nodes
+* Make sure you're using Blender 3.0 or higher, as older versions do not have the necessary geometry nodes
 * Download the file `block_on.py`. There are a couple different methods to do this on GitHub:
   1. **Good 'ole copy-paste:** copy the contents of the python file. Open up Blender and go to the scripting tab. Create a new script, and paste the file. From here you can save the file as `block_on.py` in your preferred location. 
   2. (Windows) Open up the file in GitHub and click on the button that says Raw. From here, you right-click to save the page to your Downloads folder. Switch the filetype from Text Document to All Files, and name it `block_on.py`.
@@ -52,8 +52,6 @@
         git clone https://github.com/BrendanParmer/Block-On
         ```
       in your terminal at your desired location. This method also makes updates easier, as you can simply pull from the origin whenever a new version of Block-On has been released.
-* To enable the add-on, open Blender and go to Edit>Preferences>Add-ons, and click the Install button in the top-right. From there, navigate to where you downloaded the python file, and click on it to install
-* Download the appropriate file for your Blender installation ( `block_on.py` for Blender 3.0, `block_on_3-1.py` for the Blender 3.1 alpha)
 * To enable the add-on, open Blender and go to `Edit > Preferences > Add-ons`, and click the Install button in the top-right. From there, navigate to where you downloaded the python file, and click on it to install
 * Now that you have the Block-On add-on enabled, you can use it by selecting any mesh, going to Object, and hitting the Block-On button. This automatically generates a Geometry Nodes group for your object, with parameters you can adjust in the Modifiers tab
 
@@ -95,10 +93,10 @@
 
 **I added another material to my mesh, but it isn't updating. Why?**
 * To keep a procedural workflow within the existing Geometry Nodes framework, the Block-On add-on needs to separate the faces of the mesh by all its materials when the node group is initialized. To do this, it loops through the existing materials in the mesh and creates a sub-node group for each one
-* To update the mesh, simply reapply the Block-On function in the Object tag. The add-on will automatically remove the previous node groups from your blend file and replace them with new ones
+* To update the mesh, reapply the Block-On function in the Object tag. The add-on will automatically remove the previous node groups from your blend file and replace them with new ones
 
 **Why is the node group not generating?**
-* Your version of Blender may be outdated. Currently, support is officially available for Blender 3.0, as well as experimental support for 3.1
+* Your version of Blender may be outdated. As of January 2022, support is officially available for Blender 3.0, and there's experimental support for the 3.1 beta and the 3.2 alpha
 
 **What are you planning on adding for the future?**
 * I am currently working on better ways for users to download the add-on and be notified when new updates are released. This will probably look like a website where you can download the python file, read the documentation, and sign up for an email list for when new updates are released
