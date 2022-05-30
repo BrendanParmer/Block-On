@@ -26,38 +26,13 @@ class block_on(bpy.types.Operator):
                 mat = bpy.data.materials.new(name="Material")
             obj.data.materials.append(mat)
         
-        #delete old block_on stuff if it exists
-        #TODO: wrap in function
-        
-        #solidify colors modifier
-        old_sc_mod = obj.modifiers.get("Solidify Colors")
-        if old_sc_mod is not None:
-            obj.modifiers.remove(old_sc_mod)
-            
-        #block on modifier
-        old_bo_mod = obj.modifiers.get("Block On")
-        if old_bo_mod is not None:
-            obj.modifiers.remove(old_bo_mod)
-           
-        #node groups
-        block_on_groups = ["Block On ", 
-                           "Generate Cubes ", 
-                           "Level Viewer ", 
-                           "Material ", 
-                           "On Points ",
-                           "Transform Mesh ",
-                           "Voxelize ",
-                           "Solidify Colors "]
-        node_groups = bpy.data.node_groups
-        
-        for group_name in block_on_groups:
-            group = node_groups.get(group_name + name)
-            if group is not None:
-                node_groups.remove(group) 
+        cleanup(obj, name) 
         
         #add color attribute
         if obj.data.attributes.get("Solidify Colors") is None:
             obj.data.attributes.new(name="Solidify Colors", type='FLOAT_COLOR', domain='POINT')
+        
+        node_groups = bpy.data.node_groups
         
         #solidify colors modifier
         sc_attr_name = "Solidify Colors"
@@ -84,9 +59,40 @@ class block_on(bpy.types.Operator):
         bo_modifier.node_group = node_groups["Block On " + name]
         
         return {"FINISHED"}
-        
 
+"""
+Deletes old Block On stuff if it exists
+"""        
+def cleanup(obj, name):
+    #solidify colors modifier
+    old_sc_mod = obj.modifiers.get("Solidify Colors")
+    if old_sc_mod is not None:
+        obj.modifiers.remove(old_sc_mod)
+        
+    #block on modifier
+    old_bo_mod = obj.modifiers.get("Block On")
+    if old_bo_mod is not None:
+        obj.modifiers.remove(old_bo_mod)
        
+    #node groups
+    block_on_groups = ["Block On ", 
+                       "Generate Cubes ", 
+                       "Level Viewer ", 
+                       "Material ", 
+                       "On Points ",
+                       "Transform Mesh ",
+                       "Voxelize ",
+                       "Solidify Colors "]
+    node_groups = bpy.data.node_groups
+    
+    for group_name in block_on_groups:
+        group = node_groups.get(group_name + name)
+        if group is not None:
+            node_groups.remove(group)
+
+"""
+Create main Block On geometry node group
+"""       
 def block_on_node_group(obj_name):
     bo = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Block On " + obj_name)
 
