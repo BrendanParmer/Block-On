@@ -88,8 +88,8 @@
         ```
       in your terminal at your desired location. This method also makes updates easier, as you can simply pull from the origin whenever a new version of Block-On has been released.
 * To enable the add-on, open Blender and go to `Edit > Preferences > Add-ons`, and click the Install button in the top-right. From there, navigate to where you downloaded the python file, and click on it to install
-* Now that you have the Block-On add-on enabled, you can use it by selecting any mesh, going to Object, and hitting the Block-On button. This automatically generates a Geometry Nodes group for your object, with parameters you can adjust in the Modifiers tab
-* If you have an image texture that you use in a material, open up its shader editor. Add an Attribute node, and use the attribute named Color created by the modifier. Connect the Vector socket to the Vector socket of your image texture node, and it will automatically apply.
+* Now that you have the Block-On add-on enabled, you can use it by selecting any mesh, and doing `Object > Block On`. This automatically generates a Geometry Nodes group for your object, with parameters you can adjust in the Modifiers tab
+* If you have an **image texture** that you use in a material, open up its shader editor. Add an Attribute node, and use the attribute named Color created by the modifier. Connect the Vector socket to the Vector socket of your image texture node, and it will automatically apply.
 
 ## Parameters
 * **Resolution**: the maximum number of blocks along a dimension
