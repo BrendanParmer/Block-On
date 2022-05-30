@@ -15,10 +15,10 @@
 <table style="margin-left: auto; margin-right: auto;">
  <tr>
   <td>
-   <img src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/before.png" alt = "Before" width = "400" height = "400"/>
+   <img src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/suzanne_before.png" alt = "Before" width = "400" height = "400"/>
   </td>
   <td>
-   <img src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/after.png" alt = "After" width = "400" height="400"/>
+   <img src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/suzanne_after.png" alt = "After" width = "400" height="400"/>
   </td>
  </tr>
  <tr>
@@ -27,6 +27,29 @@
   </td>
   <td>
    <p style="text-align: center;">After</p>
+  </td>
+ </tr>
+</table>
+<table style="margin-left: auto; margin-right: auto;">
+ <tr>
+  <td>
+    <img src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/lizard_before.png">
+  </td>
+  <td>
+    <img src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/lizard_after.png">
+  </td>
+ </tr>
+ <tr>
+  <td>
+    <p style="text-align: center;">Before</p>
+  </td>
+  <td>
+    <p style="text-align: center;">After</p>
+  </td>
+ </tr>
+ <tr>
+  <td>
+  "Lizard Mage" (https://skfb.ly/68X67) by Enalrem is licensed under Creative Commons Attribution-NonCommercial (http://creativecommons.org/licenses/by-nc/4.0/).
   </td>
  </tr>
 </table>
@@ -89,7 +112,7 @@
 * This is typically due to not applying transforms to the mesh. You can check in the Object Properties tab to see the transforms are default, and if not, press CTRL-A to apply All Transforms to the mesh. The add-on will update the mesh automatically
 
 **How do I change the parameter limits?**
-* This is generally not recommended due to excessively large values causing Blender to crash. However, if need be you can open the Block On node group in a Geometry Nodes tab and navigate to the Group panel. From there, you can see the list of inputs and outputs. Click on the input you want to modify, and you can specify your needed constraints for your project
+* . However, if need be you can open the Block On node group in a Geometry Nodes tab and navigate to the Group panel. From there, you can see the list of inputs and outputs. Click on the input you want to modify, and you can specify your needed constraints for your project
 
 **I added another material to my mesh, but it isn't updating. Why?**
 * To keep a procedural workflow within the existing Geometry Nodes framework, the Block-On add-on needs to separate the faces of the mesh by all its materials when the node group is initialized. To do this, it loops through the existing materials in the mesh and creates a sub-node group for each one

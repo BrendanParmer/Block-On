@@ -2,7 +2,7 @@ bl_info = {
     "name" : "Block On",
     "description" : "Voxelize object and view its cross sections",
     "author" : "Brendan Parmer", 
-    "version" : (1, 0, 1),
+    "version" : (1, 2, 0),
     "blender" : (3, 0, 0),
     "location" : "Object",
     "category" : "Object"
@@ -27,10 +27,16 @@ class block_on(bpy.types.Operator):
             obj.data.materials.append(mat)
         
         #delete old block_on stuff if it exists
-        #modifier
-        old_mod = obj.modifiers.get("Block On")
-        if old_mod is not None:
-            obj.modifiers.remove(old_mod)
+        
+        #solidify colors modifier
+        old_sc_mod = obj.modifiers.get("Solidify Colors")
+        if old_sc_mod is not None:
+            obj.modifiers.remove(old_sc_mod)
+            
+        #block on modifier
+        old_bo_mod = obj.modifiers.get("Block On")
+        if old_bo_mod is not None:
+            obj.modifiers.remove(old_bo_mod)
             
         #node groups
         block_on_groups = ["Block On ", 
@@ -39,19 +45,40 @@ class block_on(bpy.types.Operator):
                            "Material ", 
                            "On Points ",
                            "Transform Mesh ",
-                           "Voxelize "]
+                           "Voxelize ",
+                           "Solidify Colors "]
         node_groups = bpy.data.node_groups
         
         for group_name in block_on_groups:
             group = node_groups.get(group_name + name)
             if group is not None:
                 node_groups.remove(group) 
-      
+        
+        #add color attribute
+        obj.data.attributes.new(name="Color", type='FLOAT_COLOR', domain='POINT')
+        
+        #solidify colors modifier
+        solidify_colors_node_group(name)
+        sc_modifier = obj.modifiers.new(name = "Solidify Colors", type = "NODES")
+        if bpy.app.version < (3, 2, 0):
+            node_groups.remove(sc_modifier.node_group)
+        sc_modifier.node_group = node_groups["Solidify Colors " + name]
+        
+        input_id = next(i for i in sc_modifier.node_group.inputs if i.name == "UV Map").identifier
+        sc_modifier[input_id + "_attribute_name"] = "UVMap"
+        sc_modifier[input_id + "_use_attribute"]  = True
+        
+        output_id = next(i for i in sc_modifier.node_group.outputs if i.name == "Color").identifier
+        sc_modifier[output_id + "_attribute_name"] = "Color"
+        sc_modifier[output_id + "_use_attribute"]  = True
+        
         #block on modifier
         block_on_node_group(obj_name = name)
-        modifier = obj.modifiers.new(name = "Block On", type = "NODES")
-        node_groups.remove(modifier.node_group)
-        modifier.node_group = node_groups["Block On " + name]
+        bo_modifier = obj.modifiers.new(name = "Block On", type = "NODES")
+        if bpy.app.version < (3, 2, 0): #NTS: look into this
+            node_groups.remove(bo_modifier.node_group)
+        bo_modifier.node_group = node_groups["Block On " + name]
+        
         return {"FINISHED"}
         
 
@@ -141,8 +168,6 @@ def block_on_node_group(obj_name):
     bo.inputs["Density"].min_value = 0.0
     bo.inputs["Density"].default_value = 10.0
     bo.inputs["Density"].max_value = 100.0
-
-
     
 def transform_mesh_node_group(set_name):
     tm = bpy.data.node_groups.new(type="GeometryNodeTree", name = "Transform Mesh " + set_name)
@@ -275,8 +300,6 @@ def transform_mesh_node_group(set_name):
     tm_output.location = (1800,-200)
     tm.links.new(tm_transform.outputs["Geometry"], tm_output.inputs["Geometry"])
 
-
-
 def generate_cubes_node_group(set_name):
     gc = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Generate Cubes " + set_name)
     
@@ -298,8 +321,7 @@ def generate_cubes_node_group(set_name):
     #materials
     material_node_group(set_name)
     obj = bpy.data.objects[set_name]
-    i = 0
-    for m in obj.material_slots:
+    for i, m in enumerate(obj.material_slots):
         material = m.material 
         gc_m = gc.nodes.new("GeometryNodeGroup")
         y_pos =  -(len(obj.material_slots) * 30 - i * 60)
@@ -319,8 +341,6 @@ def generate_cubes_node_group(set_name):
         
         #output
         gc.links.new(gc_m.outputs["Geometry"], gc_join.inputs[0])
-        
-        i += 1
     
     #output node
     gc.outputs.new("NodeSocketGeometry", "Geometry")
@@ -329,9 +349,7 @@ def generate_cubes_node_group(set_name):
     gc_output.location = (600, 0)
     
     gc.links.new(gc_join.outputs["Geometry"], gc_output.inputs["Geometry"])
-  
-  
-    
+   
 def material_node_group(set_name):
     m = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Material " + set_name)
     
@@ -412,8 +430,6 @@ def material_node_group(set_name):
 
     m.links.new(m_sm.outputs["Geometry"], m_output.inputs["Geometry"])
   
-  
-    
 def voxelize_node_group(set_name):
     v = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Voxelize " + set_name)
     
@@ -461,8 +477,6 @@ def voxelize_node_group(set_name):
     
     v.links.new(v_sp.outputs["Geometry"], v_output.inputs["Geometry"])
   
-  
-
 def level_viewer_node_group(set_name):
     lv = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Level Viewer " + set_name)
     
@@ -564,9 +578,6 @@ def level_viewer_node_group(set_name):
     lv_output.location = (1200, -300)
     lv.links.new(lv_not.outputs[0], lv_output.inputs[0])
 
-
-
-
 def on_points_node_group(set_name):
     op = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "On Points " + set_name)
     
@@ -609,6 +620,48 @@ def on_points_node_group(set_name):
     
     op.links.new(op_transform.outputs["Geometry"], op_output.inputs["Geometry"])   
     
+def solidify_colors_node_group(set_name):
+    sc = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Solidify Colors " + set_name)
+    
+    #input node
+    sc.inputs.new("NodeSocketGeometry", "Geometry")
+    sc.inputs.new("NodeSocketColor",    "UV Map")
+    
+    sc_input = sc.nodes.new("NodeGroupInput")
+    sc_input.location = (0, 0)
+    
+    #transfer attribute
+    sc_ta = sc.nodes.new("GeometryNodeAttributeTransfer")
+    
+    sc_ta.data_type = 'FLOAT_VECTOR'
+    sc_ta.mapping   = 'NEAREST'
+    sc_ta.domain    = 'CORNER'
+    
+    sc_ta.location = (200, -100)
+    
+    sc.links.new(sc_input.outputs["Geometry"], sc_ta.inputs["Source"])
+    link = sc.links.new(sc_input.outputs["UV Map"], sc_ta.inputs["Attribute"])
+    if link is None:
+        print("NO")
+    else:
+        print(link)
+        print("Muted:", link.is_muted)
+        print("Hidden:", link.is_hidden)
+        print("Valid:", link.is_valid)
+        print("From:", link.from_node, link.from_socket)
+        print("To:", link.to_node, link.to_socket)
+        
+    
+    #output node
+    sc.outputs.new("NodeSocketGeometry", "Geometry")
+    sc.outputs.new("NodeSocketColor",    "Color")
+    sc.outputs["Color"].attribute_domain = 'FACE'
+    
+    sc_output = sc.nodes.new("NodeGroupOutput")
+    sc_output.location = (400, 0)
+    
+    sc.links.new(sc_input.outputs["Geometry"], sc_output.inputs["Geometry"])
+    sc.links.new(sc_ta.outputs["Attribute"],   sc_output.inputs["Color"])
     
 def menu_func(self, context):
         self.layout.operator(block_on.bl_idname)
