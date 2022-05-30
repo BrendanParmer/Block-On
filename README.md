@@ -91,6 +91,12 @@
 * Now that you have the Block-On add-on enabled, you can use it by selecting any mesh, and doing `Object > Block On`. This automatically generates a Geometry Nodes group for your object, with parameters you can adjust in the Modifiers tab
 * If you have an **image texture** that you use in a material, open up its shader editor. Add an Attribute node, and use the attribute named Color created by the modifier. Connect the Vector socket to the Vector socket of your image texture node, and it will automatically apply.
 
+  <img 
+        src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/solidify_colors_attribute.png" 
+        alt="Solidify Colors Material" 
+        width="600" 
+        height="400">
+
 ## Parameters
 * **Resolution**: the maximum number of blocks along a dimension
   * Default: 32
