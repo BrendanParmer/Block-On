@@ -178,7 +178,10 @@ def block_on_node_group(obj_name):
     bo.inputs["Density"].min_value = 0.0
     bo.inputs["Density"].default_value = 10.0
     bo.inputs["Density"].max_value = 100.0
-    
+
+"""
+Creates geometry node group that scales and aligns the mesh so each block is one unit wide
+"""   
 def transform_mesh_node_group(set_name):
     tm = bpy.data.node_groups.new(type="GeometryNodeTree", name = "Transform Mesh " + set_name)
     
@@ -195,9 +198,7 @@ def transform_mesh_node_group(set_name):
     tm_pos.hide = True
     
     """
-    There is an easier way to do this with nodes, but for some reason I can't connect
-    the position and attribute statistic vectors with scripting, so I've gotta
-    separate by XYZ. 
+    There is an easier way to do this with nodes, but for some reason I can't connect the position and attribute statistic vectors with scripting, so I've gotta separate by XYZ. 
     """
     #separate xyz
     tm_sep_xyz = tm.nodes.new("ShaderNodeSeparateXYZ")
@@ -310,6 +311,9 @@ def transform_mesh_node_group(set_name):
     tm_output.location = (1800,-200)
     tm.links.new(tm_transform.outputs["Geometry"], tm_output.inputs["Geometry"])
 
+"""
+Creates the node group that performs voxelization and material management
+"""
 def generate_cubes_node_group(set_name):
     gc = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Generate Cubes " + set_name)
     
@@ -359,7 +363,10 @@ def generate_cubes_node_group(set_name):
     gc_output.location = (600, 0)
     
     gc.links.new(gc_join.outputs["Geometry"], gc_output.inputs["Geometry"])
-   
+
+"""
+Creates the node group that handles objects with multiple materials
+"""   
 def material_node_group(set_name):
     m = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Material " + set_name)
     
@@ -439,7 +446,10 @@ def material_node_group(set_name):
     m_output.location = (1400, 0)
 
     m.links.new(m_sm.outputs["Geometry"], m_output.inputs["Geometry"])
-  
+
+"""
+Creates the node group responsible for voxelization
+""" 
 def voxelize_node_group(set_name):
     v = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Voxelize " + set_name)
     
@@ -486,7 +496,10 @@ def voxelize_node_group(set_name):
     v_output.location = (800, 0)
     
     v.links.new(v_sp.outputs["Geometry"], v_output.inputs["Geometry"])
-  
+
+"""
+Creates the node group that adjusts which levels are visible
+""" 
 def level_viewer_node_group(set_name):
     lv = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Level Viewer " + set_name)
     
@@ -588,6 +601,11 @@ def level_viewer_node_group(set_name):
     lv_output.location = (1200, -300)
     lv.links.new(lv_not.outputs[0], lv_output.inputs[0])
 
+"""
+Creates the node group that aligns blocks in between lines or on intersections
+    0 - cubes will spawn on points like (0.5, 0.5, 0.5)
+    1 - cubes will spawn on points like (1.0, 0.0, 0.0)
+"""
 def on_points_node_group(set_name):
     op = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "On Points " + set_name)
     
@@ -629,7 +647,10 @@ def on_points_node_group(set_name):
     op_output.location = (800, 0)
     
     op.links.new(op_transform.outputs["Geometry"], op_output.inputs["Geometry"])   
-    
+
+"""
+Creates the node group that creates a color attribute that solidifies colors from an image texture
+"""    
 def solidify_colors_node_group(set_name):
     sc = bpy.data.node_groups.new(type = "GeometryNodeTree", name = "Solidify Colors " + set_name)
     
