@@ -27,6 +27,7 @@ class block_on(bpy.types.Operator):
             obj.data.materials.append(mat)
         
         #delete old block_on stuff if it exists
+        #TODO: wrap in function
         
         #solidify colors modifier
         old_sc_mod = obj.modifiers.get("Solidify Colors")
@@ -37,7 +38,7 @@ class block_on(bpy.types.Operator):
         old_bo_mod = obj.modifiers.get("Block On")
         if old_bo_mod is not None:
             obj.modifiers.remove(old_bo_mod)
-            
+           
         #node groups
         block_on_groups = ["Block On ", 
                            "Generate Cubes ", 
@@ -55,21 +56,24 @@ class block_on(bpy.types.Operator):
                 node_groups.remove(group) 
         
         #add color attribute
-        obj.data.attributes.new(name="Color", type='FLOAT_COLOR', domain='POINT')
+        if obj.data.attributes.get("Solidify Colors") is None:
+            obj.data.attributes.new(name="Solidify Colors", type='FLOAT_COLOR', domain='POINT')
         
         #solidify colors modifier
+        sc_attr_name = "Solidify Colors"
+        
         solidify_colors_node_group(name)
-        sc_modifier = obj.modifiers.new(name = "Solidify Colors", type = "NODES")
+        sc_modifier = obj.modifiers.new(name = sc_attr_name, type = "NODES")
         if bpy.app.version < (3, 2, 0):
             node_groups.remove(sc_modifier.node_group)
-        sc_modifier.node_group = node_groups["Solidify Colors " + name]
+        sc_modifier.node_group = node_groups[sc_attr_name + " " + name]
         
         input_id = next(i for i in sc_modifier.node_group.inputs if i.name == "UV Map").identifier
         sc_modifier[input_id + "_attribute_name"] = "UVMap"
         sc_modifier[input_id + "_use_attribute"]  = True
         
         output_id = next(i for i in sc_modifier.node_group.outputs if i.name == "Color").identifier
-        sc_modifier[output_id + "_attribute_name"] = "Color"
+        sc_modifier[output_id + "_attribute_name"] = sc_attr_name
         sc_modifier[output_id + "_use_attribute"]  = True
         
         #block on modifier
