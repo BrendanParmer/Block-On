@@ -2,7 +2,7 @@ bl_info = {
     "name" : "Block On",
     "description" : "Voxelize object and view its cross sections",
     "author" : "Brendan Parmer", 
-    "version" : (1, 2, 0),
+    "version" : (1, 1, 0),
     "blender" : (3, 0, 0),
     "location" : "Object",
     "category" : "Object"
