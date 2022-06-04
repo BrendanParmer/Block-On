@@ -14,8 +14,8 @@ class BlockOn(bpy.types.Operator):
     bl_label = "Block On"
     bl_options = {'REGISTER', 'UNDO'}
 
-    sc: bpy.props.BoolProperty(name="Solidify Colors", default=True)
-    bo: bpy.props.BoolProperty(name="Block On", default=True)
+    sc: bpy.props.BoolProperty(name="Solidify Colors", default=True, description="Creates a color attribute for object with image textures")
+    bo: bpy.props.BoolProperty(name="Block On", default=True, description="Transforms and voxelizes geometry")
     
     def execute(self, context):
         #set up
