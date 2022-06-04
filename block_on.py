@@ -9,7 +9,7 @@ bl_info = {
 }
 import bpy
 
-class block_on(bpy.types.Operator):
+class BlockOn(bpy.types.Operator):
     bl_idname = "object.block_on"
     bl_label = "Block On"
     bl_option = {'REGISTER', 'UNDO'}
@@ -685,16 +685,17 @@ class block_on(bpy.types.Operator):
         
         sc.links.new(sc_input.outputs["Geometry"], sc_output.inputs["Geometry"])
         sc.links.new(sc_ta.outputs["Attribute"],   sc_output.inputs["Color"])
-     
+
+
 def menu_func(self, context):
-        self.layout.operator(block_on.bl_idname)
+    self.layout.operator(BlockOn.bl_idname)
             
 def register():
-    bpy.utils.register_class(block_on)
+    bpy.utils.register_class(BlockOn)
     bpy.types.VIEW3D_MT_object.append(menu_func)
     
 def unregister():
-    bpy.utils.unregister_class(block_on)
+    bpy.utils.unregister_class(BlockOn)
     bpy.types.VIEW3D_MT_objects.remove(menu_func)
     
 if __name__ == "__main__":
