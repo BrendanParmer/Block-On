@@ -12,10 +12,10 @@ import bpy
 class BlockOn(bpy.types.Operator):
     bl_idname = "object.block_on"
     bl_label = "Block On"
-    bl_option = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER', 'UNDO'}
 
-    is_solidify_colors: bpy.props.BoolProperty(name = "Solidify Colors")
-    is_block_on:        bpy.props.BoolProperty(name = "Block On")
+    sc: bpy.props.BoolProperty(name="Solidify Colors", default=True)
+    bo: bpy.props.BoolProperty(name="Block On", default=True)
     
     def execute(self, context):
         #set up
@@ -31,35 +31,11 @@ class BlockOn(bpy.types.Operator):
         
         self.cleanup(obj, name) 
         
-        #add color attribute
-        if obj.data.attributes.get("Solidify Colors") is None:
-            obj.data.attributes.new(name="Solidify Colors", type='FLOAT_COLOR', domain='POINT')
-        
-        node_groups = bpy.data.node_groups
-        
-        #solidify colors modifier
-        sc_attr_name = "Solidify Colors"
-        
-        self.solidify_colors_node_group(name)
-        sc_modifier = obj.modifiers.new(name = sc_attr_name, type = "NODES")
-        if bpy.app.version < (3, 2, 0):
-            node_groups.remove(sc_modifier.node_group)
-        sc_modifier.node_group = node_groups[sc_attr_name + " " + name]
-        
-        input_id = next(i for i in sc_modifier.node_group.inputs if i.name == "UV Map").identifier
-        sc_modifier[input_id + "_attribute_name"] = "UVMap"
-        sc_modifier[input_id + "_use_attribute"]  = True
-        
-        output_id = next(i for i in sc_modifier.node_group.outputs if i.name == "Color").identifier
-        sc_modifier[output_id + "_attribute_name"] = sc_attr_name
-        sc_modifier[output_id + "_use_attribute"]  = True
-        
-        #block on modifier
-        self.block_on_node_group(obj_name = name)
-        bo_modifier = obj.modifiers.new(name = "Block On", type = "NODES")
-        if bpy.app.version < (3, 2, 0): #NTS: look into this
-            node_groups.remove(bo_modifier.node_group)
-        bo_modifier.node_group = node_groups["Block On " + name]
+        if (self.sc):
+            self.sc_modifier(obj, name)
+
+        if (self.bo):
+            self.bo_modifier(obj, name)
         
         return {"FINISHED"}
 
@@ -92,6 +68,42 @@ class BlockOn(bpy.types.Operator):
             group = node_groups.get(group_name + name)
             if group is not None:
                 node_groups.remove(group)
+
+    """
+    Creates Solidify Colors modifier
+    """
+    def sc_modifier(self, obj, name):
+        if obj.data.attributes.get("Solidify Colors") is None:
+                obj.data.attributes.new(name="Solidify Colors", type='FLOAT_COLOR', domain='POINT')
+        
+        node_groups = bpy.data.node_groups
+        sc_attr_name = "Solidify Colors"
+        
+        self.solidify_colors_node_group(name)
+        sc_modifier = obj.modifiers.new(name = sc_attr_name, type = "NODES")
+        if bpy.app.version < (3, 2, 0):
+            node_groups.remove(sc_modifier.node_group)
+        sc_modifier.node_group = node_groups[sc_attr_name + " " + name]
+    
+        input_id = next(i for i in sc_modifier.node_group.inputs if i.name == "UV Map").identifier
+        sc_modifier[input_id + "_attribute_name"] = "UVMap"
+        sc_modifier[input_id + "_use_attribute"]  = True
+        
+        output_id = next(i for i in sc_modifier.node_group.outputs if i.name == "Color").identifier
+        sc_modifier[output_id + "_attribute_name"] = sc_attr_name
+        sc_modifier[output_id + "_use_attribute"]  = True
+
+    """
+    Creates Block On modifier
+    """
+    def bo_modifier(self, obj, name):
+        #block on modifier
+        node_groups = bpy.data.node_groups
+        self.block_on_node_group(obj_name = name)
+        bo_modifier = obj.modifiers.new(name = "Block On", type = "NODES")
+        if bpy.app.version < (3, 2, 0):
+            node_groups.remove(bo_modifier.node_group)
+        bo_modifier.node_group = node_groups["Block On " + name]
 
     """
     Create main Block On geometry node group
