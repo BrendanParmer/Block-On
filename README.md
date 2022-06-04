@@ -60,12 +60,9 @@
       <p style="text-align: center;">After</p>
     </td>
   </tr>
-  <tr>
-    <td>
-      <p>"Lizard Mage" (https://skfb.ly/68X67) by Enalrem is licensed under Creative Commons Attribution-NonCommercial (http://creativecommons.org/licenses/by-nc/4.0/).</p>
-    </td>
-  </tr>
-</table>
+ </table>
+ <p>"Lizard Mage" (https://skfb.ly/68X67) by Enalrem is licensed under Creative Commons Attribution-NonCommercial (http://creativecommons.org/licenses/by-nc/4.0/).</p>
+
 
 ## Prerequisites
 * Just Blender 3.0 or higher!
@@ -94,7 +91,7 @@
   <img 
         src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/sc_mat.png" 
         alt="Solidify Colors Material" 
-        width="600" 
+        width="960" 
         height="400">
 
 ## Parameters
