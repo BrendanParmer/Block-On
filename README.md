@@ -4,7 +4,7 @@
 
 ## A Blender add-on for procedural voxelization of meshes with cross-secton viewing. 
 <img 
-     src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/build_animation.gif" 
+     src="https://github.com/BrendanParmer/Block-On/blob/imgs/imgs/build_animation.gif" 
      alt="Build animation" 
      width = "850" 
      height = "850"
@@ -13,14 +13,14 @@
   <tr>
     <td>
       <img 
-        src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/suzanne_before.png" 
+        src="https://github.com/BrendanParmer/Block-On/blob/imgs/imgs/suzanne_before.png" 
         alt ="Suzanne Before" 
         width="400" 
         height = "400">
     </td>
     <td>
       <img 
-        src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/suzanne_after.png" 
+        src="https://github.com/BrendanParmer/Block-On/blob/imgs/imgs/suzanne_after.png" 
         alt = "Suzanne After" 
         width = "400" 
         height="400">
@@ -39,14 +39,14 @@
   <tr>
     <td>
       <img 
-        src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/lizard_before.png" 
+        src="https://github.com/BrendanParmer/Block-On/blob/imgs/imgs/lizard_before.png" 
         alt="Lizard Before" 
         width="400" 
         height="400">
     </td>
     <td>
       <img 
-        src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/lizard_after.png" 
+        src="https://github.com/BrendanParmer/Block-On/blob/imgs/imgs/lizard_after.png" 
         alt="Lizard After" 
         width="400" 
         height="400">
@@ -89,10 +89,10 @@
 * If you have an **image texture** that you use in a material, open up its shader editor. Add an Attribute node, and use the attribute named Solidify Colors created by the modifier. Connect the Vector socket to the Vector socket of your image texture node, and it will automatically apply.
 
   <img 
-        src="https://github.com/BrendanParmer/Block-On/blob/master/imgs/sc_mat.png" 
-        alt="Solidify Colors Material" 
-        width="960" 
-        height="400">
+    src="https://github.com/BrendanParmer/Block-On/blob/imgs/imgs/sc_mat.png" 
+    alt="Solidify Colors Material" 
+    width="960" 
+    height="400">
 
 ## Parameters
 * **Resolution**: the maximum number of blocks along a dimension
