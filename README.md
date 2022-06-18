@@ -135,7 +135,7 @@
 * To update the mesh, reapply the Block-On function in the Object tag. The add-on will automatically remove the previous node groups from your blend file and replace them with new ones
 
 **Why is the node group not generating?**
-* Your version of Blender may be outdated. As of May 2022, support is officially available for Blender 3.0 and 3.1, as well as the 3.2 beta. 
+* Your version of Blender may be outdated. As of May 2022, support is officially available for Blender 3.0-3.2. 
 
 **What are you planning on adding for the future?**
 * I am currently working on better ways for users to download the add-on and be notified when new updates are released. This will probably look like a website where you can download the python file, read the documentation, and sign up for an email list for when new updates are released
