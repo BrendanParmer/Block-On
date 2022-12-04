@@ -2,6 +2,9 @@
 
  A Blender add-on for procedural voxelization of meshes with cross-secton viewing. 
 
+
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/BrendanParmer/Block-On)](https://github.com/BrendanParmer/Block-On/releases) [![GitHub](https://img.shields.io/github/license/BrendanParmer/Block-On)](https://github.com/BrendanParmer/Block-On/blob/main/LICENSE) ![](https://visitor-badge.laobi.icu/badge?page_id=BrendanParmer.Block-On)
+
 ## A Blender add-on for procedural voxelization of meshes with cross-secton viewing. 
 <img 
      src="https://github.com/BrendanParmer/Block-On/blob/imgs/imgs/build_animation.gif" 
