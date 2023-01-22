@@ -68,7 +68,7 @@
 
 
 ## Prerequisites
-* Blender 3.0-3.3
+* Blender 3.0-3.4
 
 ## Features
 * Automatically scales the modified mesh to align with Blender's coordinate system for easy visibility
@@ -78,7 +78,7 @@
 
 ## How to use
 
-* Make sure you're using Blender 3.0-3.3. Version 3.4 is not currently supported
+* Make sure you're using Blender 3.0-3.4.
 * Download the file `block_on.py`. There are a couple different methods to do this on GitHub:
   1. **Good 'ole copy-paste:** copy the contents of the python file. Open up Blender and go to the scripting tab. Create a new script, and paste the file. From here you can save the file as `block_on.py` in your preferred location. 
   2. Open up the file in GitHub and click on the button that says Raw. From here, you right-click to save the page to your Downloads folder. If using Windows, switch the filetype from Text Document to All Files. Make sure it is named `block_on.py`, and save it.
