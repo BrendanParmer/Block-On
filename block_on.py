@@ -2,7 +2,7 @@ bl_info = {
     "name" : "Block On",
     "description" : "Voxelize object and view its cross sections",
     "author" : "Brendan Parmer", 
-    "version" : (1, 1, 1),
+    "version" : (1, 1, 0),
     "blender" : (3, 0, 0),
     "location" : "Object",
     "category" : "Object"
@@ -675,39 +675,17 @@ class BlockOn(bpy.types.Operator):
         sc_input = sc.nodes.new("NodeGroupInput")
         sc_input.location = (0, 0)
         
-        if bpy.app.version < (3, 4, 0):
-            #transfer attribute
-            sc_ta = sc.nodes.new("GeometryNodeAttributeTransfer")
-            
-            sc_ta.data_type = 'FLOAT_VECTOR'
-            sc_ta.mapping   = 'NEAREST'
-            sc_ta.domain    = 'CORNER'
-            
-            sc_ta.location = (200, -100)
-            
-            sc.links.new(sc_input.outputs["Geometry"], sc_ta.inputs[0])
-            sc.links.new(sc_input.outputs["UV Map"], sc_ta.inputs["Attribute"])
-        else:
-            #sample nearest
-            sc_sn = sc.nodes.new("GeometryNodeSampleNearest")
-            
-            sc_sn.domain = 'CORNER'
-            
-            sc_sn.location = (200, -300)
-            
-            sc.links.new(sc_input.outputs["Geometry"], sc_sn.inputs["Geometry"])
-            
-            #sample index
-            sc_si = sc.nodes.new("GeometryNodeSampleIndex")
-            
-            sc_si.data_type = 'FLOAT_VECTOR'
-            sc_si.domain = 'CORNER'
-            
-            sc_si.location = (400, -100)
-            
-            sc.links.new(sc_input.outputs["Geometry"], sc_si.inputs["Geometry"])
-            sc.links.new(sc_input.outputs["UV Map"], sc_si.inputs[3])
-            sc.links.new(sc_sn.outputs["Index"], sc_si.inputs["Index"])
+        #transfer attribute
+        sc_ta = sc.nodes.new("GeometryNodeAttributeTransfer")
+        
+        sc_ta.data_type = 'FLOAT_VECTOR'
+        sc_ta.mapping   = 'NEAREST'
+        sc_ta.domain    = 'CORNER'
+        
+        sc_ta.location = (200, -100)
+        
+        sc.links.new(sc_input.outputs["Geometry"], sc_ta.inputs["Source"])
+        sc.links.new(sc_input.outputs["UV Map"], sc_ta.inputs["Attribute"])
         
         #output node
         sc.outputs.new("NodeSocketGeometry", "Geometry")
@@ -715,18 +693,14 @@ class BlockOn(bpy.types.Operator):
         sc.outputs["Color"].attribute_domain = 'FACE'
         
         sc_output = sc.nodes.new("NodeGroupOutput")
-        sc_output.location = (600, 0)
+        sc_output.location = (400, 0)
         
         sc.links.new(sc_input.outputs["Geometry"], sc_output.inputs["Geometry"])
-        
-        if bpy.app.version < (3, 4, 0):
-            sc.links.new(sc_ta.outputs["Attribute"],   sc_output.inputs["Color"])
-        else:
-            sc.links.new(sc_si.outputs[2], sc_output.inputs["Color"])
+        sc.links.new(sc_ta.outputs["Attribute"],   sc_output.inputs["Color"])
 
 
 def menu_func(self, context):
-    self.layout.operator(BlockOn.bl_idname, text=BlockOn.bl_label)
+    self.layout.operator(BlockOn.bl_idname)
             
 def register():
     bpy.utils.register_class(BlockOn)
@@ -734,7 +708,7 @@ def register():
     
 def unregister():
     bpy.utils.unregister_class(BlockOn)
-    bpy.types.VIEW3D_MT_object.remove(menu_func)
+    bpy.types.VIEW3D_MT_objects.remove(menu_func)
     
 if __name__ == "__main__":
     register() 
